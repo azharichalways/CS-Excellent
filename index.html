@@ -1,107 +1,4 @@
-<!DOCTYPE html>
-<html lang="id" class="h-full bg-slate-50">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CS Excellent - PT Putra Jaya Telesindo</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icon -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts Inter & Outfit -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            500: '#0284c7',
-                            600: '#0284c7',
-                            700: '#0369a1',
-                        },
-                        accent: {
-                            amber: '#f59e0b',
-                            emerald: '#10b981',
-                            rose: '#f43f5e',
-                            purple: '#8b5cf6'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Plus Jakarta Sans', 'sans-serif'],
-                        heading: ['Outfit', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
-
-    <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; touch-action: manipulation; }
-        h1, h2, h3, h4, .font-heading { font-family: 'Outfit', sans-serif; }
-        .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
-        @keyframes shake {
-            10%, 90% { transform: translate3d(-1px, 0, 0); }
-            20%, 80% { transform: translate3d(2px, 0, 0); }
-            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-            40%, 60% { transform: translate3d(4px, 0, 0); }
-        }
-        .pop-in { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-        @keyframes popIn {
-            0% { opacity: 0; transform: scale(0.8); }
-            100% { opacity: 1; transform: scale(1); }
-        }
-        .pulse-soft { animation: pulseSoft 2s infinite; }
-        @keyframes pulseSoft {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.03); }
-        }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    </style>
-</head>
-<body class="h-full text-slate-800 antialiased flex flex-col justify-between">
-
-    <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-50 w-full h-full"></canvas>
-
-    <!-- App Container (Mobile Wrapper) -->
-    <div id="app" class="max-w-md mx-auto w-full min-h-screen bg-slate-50 flex flex-col shadow-2xl relative overflow-x-hidden border-x border-slate-200">
-        
-        <!-- HEADER TOP BAR -->
-        <header id="mainHeader" class="bg-gradient-to-r from-sky-600 to-indigo-600 text-white p-4 sticky top-0 z-30 shadow-md hidden">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center gap-3">
-                    <button onclick="goToMap()" class="w-9 h-9 bg-white/20 hover:bg-white/30 rounded-xl flex items-center justify-center transition active:scale-95">
-                        <i class="fa-solid fa-map"></i>
-                    </button>
-                    <div>
-                        <h2 id="userDisplayName" class="font-bold text-sm leading-tight">Nama Peserta</h2>
-                        <div class="flex items-center gap-2 text-xs text-sky-100">
-                            <span id="userRankBadge" class="bg-white/20 px-2 py-0.5 rounded-md font-semibold text-[10px]">Trainee</span>
-                            <span id="userTeamDisplay">Tim CS</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="flex items-center gap-3">
-                    <div class="flex items-center gap-1 bg-amber-400/20 text-amber-300 px-2.5 py-1 rounded-full text-xs font-bold border border-amber-300/30">
-                        <i class="fa-solid fa-bolt text-amber-400"></i>
-                        <span id="userXP">0 XP</span>
-                    </div>
-                    <button onclick="toggleAudio()" id="audioToggleBtn" class="text-white/80 hover:text-white">
-                        <i class="fa-solid fa-volume-high text-sm"></i>
-                    </button>
-                </div>
-            </div>
-        </header>
-
-        <!-- MAIN VIEW CONTAINER -->
-        <main class="flex-1 p-4 flex flex-col justify-center">
-
+<!-- ... existing code ... -->
             <!-- 1. LOGIN VIEW -->
             <div id="viewLogin" class="pop-in space-y-6 my-auto">
                 <div class="text-center space-y-2">
@@ -114,17 +11,22 @@
                 </div>
 
                 <div class="bg-slate-200 p-1 rounded-xl flex text-xs font-bold">
-                    <button id="tabBtnPeserta" onclick="switchLoginTab('peserta')" class="flex-1 py-2 rounded-lg bg-white text-sky-600 shadow-sm transition">Peserta CS</button>
+                    <button id="tabBtnPeserta" onclick="switchLoginTab('peserta')" class="flex-1 py-2 rounded-lg bg-white text-sky-600 shadow-sm transition">Peserta</button>
                     <button id="tabBtnTrainer" onclick="switchLoginTab('trainer')" class="flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-800 transition">Trainer HR</button>
                 </div>
 
                 <form id="formLoginPeserta" onsubmit="handleLoginPeserta(event)" class="space-y-4">
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Nama Lengkap CS</label>
-                        <input type="text" id="loginNama" required placeholder="Contoh: Budi Santoso" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 focus:outline-none text-sm">
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Nama Lengkap</label>
+                        <input type="text" id="loginNamaLengkap" required placeholder="Contoh: Budi Santoso" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 focus:outline-none text-sm">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Divisi / Tim CS</label>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Nama Panggung / Samaran (Alias)</label>
+                        <input type="text" id="loginNamaPanggung" required placeholder="Contoh: CS Budi Pro / Agent Falcon" class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 focus:outline-none text-sm font-semibold text-sky-700">
+                        <p class="text-[10px] text-slate-400 mt-1">Nama panggung ini yang akan muncul di Papan Klasemen & Chat Duel.</p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Divisi / Tim</label>
                         <select id="loginTim" required class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-sky-500 focus:outline-none text-sm">
                             <option value="">-- Pilih Divisi --</option>
                             <option value="Administrasi">Administrasi</option>
@@ -133,7 +35,6 @@
                         </select>
                     </div>
 
-                    <!-- KODE ROOM DIBUATKAN LEBIH JELAS SEBAGAI OPTIONAL / LATIHAN MANDIRI -->
                     <div class="pt-1">
                         <details class="group">
                             <summary class="text-[11px] font-bold text-sky-600 hover:text-sky-700 cursor-pointer flex items-center gap-1 select-none">
@@ -165,226 +66,59 @@
                     </button>
                 </form>
             </div>
-
+<!-- ... existing code ... -->
             <!-- 2. MAP VIEW -->
-            <div id="viewMap" class="hidden space-y-6 my-auto">
-                <div class="text-center space-y-1">
+            <div id="viewMap" class="hidden space-y-5 my-auto">
+                <div class="flex justify-between items-center bg-white p-3 rounded-2xl border border-slate-200 shadow-sm">
+                    <div>
+                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Identitas Peserta</h3>
+                        <div class="text-sm font-black text-slate-800" id="profileDisplayName">Nama Panggung</div>
+                        <div class="text-[11px] text-slate-500 font-medium" id="profileSubDetail">Nama Lengkap • Divisi</div>
+                    </div>
+                    <button onclick="openLeaderboardModal()" class="px-3 py-2 bg-amber-500 hover:bg-amber-600 text-slate-900 font-black rounded-xl text-xs transition flex items-center gap-1.5 shadow-md shadow-amber-500/20">
+                        <i class="fa-solid fa-trophy text-amber-900"></i>
+                        <span>Klasemen Real</span>
+                    </button>
+                </div>
+
+                <div class="text-center space-y-1 pt-1">
                     <h2 class="text-xl font-black text-slate-800 font-heading">Peta Arena Latihan</h2>
                     <p class="text-xs text-slate-500">Selesaikan setiap level minimal peringkat 🙂 (75%)</p>
                 </div>
 
-                <div id="levelsContainer" class="relative py-4 flex flex-col items-center gap-6"></div>
-
-                <div class="grid grid-cols-2 gap-3 pt-4 border-t border-slate-200">
-                    <button onclick="openLeaderboard()" class="py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-trophy text-amber-500"></i>
-                        <span>Klasemen</span>
-                    </button>
-                    <button onclick="openBadgesModal()" class="py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-award text-purple-500"></i>
-                        <span>Lencana Saya</span>
-                    </button>
-                </div>
+                <div id="levelsContainer" class="relative py-2 flex flex-col items-center gap-3"></div>
             </div>
-
-            <!-- 3. QUIZ VIEW -->
-            <div id="viewQuiz" class="hidden space-y-5">
-                <div class="flex justify-between items-center bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
-                    <div class="flex items-center gap-2">
-                        <span id="quizLevelBadge" class="bg-sky-100 text-sky-700 text-xs font-bold px-2.5 py-1 rounded-lg">Level 1</span>
-                        <span id="quizProgressText" class="text-xs text-slate-500 font-semibold">Soal 1 / 10</span>
+<!-- ... existing code ... -->
+    <!-- KLASEMEN REAL MODAL -->
+    <div id="modalLeaderboard" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-3xl p-5 space-y-4 shadow-2xl pop-in max-h-[85vh] flex flex-col border border-slate-100">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center font-bold">
+                        🏆
                     </div>
-                    <div class="flex items-center gap-3">
-                        <div class="flex items-center gap-1 text-xs font-bold text-amber-500">
-                            <i class="fa-solid fa-fire"></i>
-                            <span id="quizStreakText">0 Streak</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-                    <p id="questionText" class="text-sm md:text-base font-semibold text-slate-800 leading-relaxed">Pertanyaan akan muncul di sini...</p>
-                    <div id="answerContainer" class="space-y-2 pt-2"></div>
-                </div>
-
-                <div id="feedbackCard" class="hidden bg-slate-100 p-4 rounded-xl border border-slate-200 space-y-3 pop-in">
-                    <div class="flex items-center gap-2">
-                        <span id="feedbackIcon" class="text-xl"></span>
-                        <h4 id="feedbackTitle" class="font-bold text-sm"></h4>
-                    </div>
-                    <p id="feedbackText" class="text-xs text-slate-600 leading-relaxed"></p>
-                    <button id="nextQuestionBtn" onclick="nextQuestion()" class="w-full py-3 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl text-xs transition shadow-md">
-                        Lanjut Soal Berikutnya <i class="fa-solid fa-chevron-right ml-1"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- 4. RESULT VIEW -->
-            <div id="viewResult" class="hidden pop-in space-y-6 my-auto text-center">
-                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-xl space-y-5">
-                    <div class="text-6xl my-2" id="resultEmoji">😍</div>
-                    <div class="space-y-1">
-                        <h3 id="resultTitle" class="text-xl font-black text-slate-800 font-heading">Luar Biasa!</h3>
-                        <p id="resultSubtitle" class="text-xs text-slate-500">Kamu telah menyelesaikan level ini.</p>
-                    </div>
-
-                    <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-2">
-                        <div class="text-xs text-slate-400 font-bold uppercase tracking-wider">Hasil CSAT Kamu</div>
-                        <div id="resultCSATLabel" class="text-lg font-black text-sky-600 font-heading">😍 Sangat Baik</div>
-                    </div>
-
-                    <div class="space-y-2 pt-2">
-                        <button id="resultNextBtn" onclick="goToNextLevelOrMap()" class="w-full py-3.5 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl text-sm transition shadow-lg shadow-sky-600/30">
-                            Lanjut ke Level Berikutnya
-                        </button>
-                        <button onclick="retryCurrentLevel()" class="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition">
-                            Ulangi Level Ini
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 5. DUEL ROLEPLAY VIEW -->
-            <div id="viewDuel" class="hidden flex-1 flex flex-col h-[85vh] bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-lg">
-                <div class="bg-slate-900 text-white p-3 flex justify-between items-center text-xs">
-                    <div class="flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
-                        <span class="font-bold">Room: <span id="duelRoomCode" class="font-mono text-amber-400">-----</span></span>
-                        <span id="duelRoundBadge" class="bg-indigo-600 text-[10px] px-2 py-0.5 rounded font-bold">Ronde 1/2</span>
-                    </div>
-                    <div id="duelTimer" class="bg-slate-800 px-2.5 py-1 rounded-lg font-mono font-bold text-amber-300 border border-amber-400/30">03:00</div>
-                </div>
-
-                <div id="duelScenarioBanner" class="bg-sky-50 border-b border-sky-100 p-3 text-xs text-slate-700 space-y-1">
-                    <div class="font-bold text-sky-800 flex items-center justify-between">
-                        <span><i class="fa-solid fa-user-secret mr-1"></i> Peran Anonim: <b id="duelUserRole" class="text-indigo-600">CS #101</b></span>
-                        <span id="duelEmotionTag" class="px-2 py-0.5 rounded text-[10px] bg-rose-100 text-rose-700 font-bold hidden">Agen Kesal</span>
-                    </div>
-                    <p id="duelScenarioDesc" class="text-[11px] text-slate-600 italic">Kasus: Saldo terpotong tapi pulsa belum masuk ke pelanggan. Minta nomor SN dan nomor HP pelanggan.</p>
-                </div>
-
-                <div id="chatBox" class="flex-1 p-3 overflow-y-auto space-y-3 bg-slate-50 text-xs no-scrollbar">
-                    <div class="text-center text-[11px] text-slate-400 my-2">-- Sesi Chat Roleplay Dimulai (Durasi 3 Menit) --</div>
-                </div>
-
-                <form onsubmit="sendDuelMessage(event)" class="p-2 border-t border-slate-200 bg-white flex gap-2">
-                    <input type="text" id="chatInput" placeholder="Ketik balasan roleplay..." class="flex-1 px-3 py-2 border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-sky-500">
-                    <button type="submit" class="px-4 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-xs font-bold transition">
-                        <i class="fa-solid fa-paper-plane"></i>
-                    </button>
-                </form>
-            </div>
-
-            <!-- 6. DUEL EVALUATION REPORT VIEW -->
-            <div id="viewDuelRapor" class="hidden space-y-5 my-auto pop-in">
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xl space-y-4 text-center">
-                    <h3 class="text-lg font-bold text-slate-800 font-heading">Rapor Evaluasi Ronde Duel</h3>
-                    
-                    <div class="text-5xl" id="raporCSATEmoji">😍</div>
-                    <div id="raporCSATText" class="font-bold text-sky-600 text-sm">CSAT: Sangat Baik</div>
-
-                    <div class="text-left bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs space-y-2">
-                        <div class="font-bold text-slate-700 border-b border-slate-200 pb-1">Catatan Evaluasi Ronde:</div>
-                        <ul id="raporCheckList" class="space-y-1 text-slate-600 list-disc pl-4"></ul>
-                    </div>
-
-                    <button id="btnNextDuelRound" onclick="startRoundTwoOrFinish()" class="w-full py-3 bg-sky-600 text-white font-bold rounded-xl text-xs shadow-md">
-                        Lanjut ke Ronde 2 (Tukar Peran)
-                    </button>
-                </div>
-            </div>
-
-            <!-- 7. TRAINER DASHBOARD VIEW -->
-            <div id="viewTrainer" class="hidden space-y-5">
-                <div class="flex justify-between items-center">
                     <div>
-                        <h2 class="text-lg font-bold text-slate-800 font-heading">Dashboard Trainer HR</h2>
-                        <p class="text-xs text-slate-500">Pantau progres & acak otomatis duel semua peserta</p>
-                    </div>
-                    <button onclick="logoutTrainer()" class="px-3 py-1.5 bg-rose-100 text-rose-700 text-xs font-bold rounded-lg hover:bg-rose-200">Keluar</button>
-                </div>
-
-                <!-- ONLINE USERS & SPIN WHEEL MATCHMAKER -->
-                <div class="bg-gradient-to-br from-indigo-900 via-slate-900 to-indigo-950 text-white p-4 rounded-2xl shadow-lg space-y-4">
-                    <div class="flex justify-between items-center">
-                        <h3 class="font-bold text-sm flex items-center gap-2">
-                            <i class="fa-solid fa-users text-emerald-400"></i> Peserta Online Saat Ini: <span id="onlineCountBadge" class="bg-emerald-500 text-slate-900 px-2 py-0.5 rounded-full text-xs font-black">0</span>
-                        </h3>
-                        <button onclick="loadOnlineUsers()" class="text-indigo-200 hover:text-white text-xs"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
-                    </div>
-
-                    <div id="onlineUsersList" class="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto py-1">
-                        <span class="text-xs text-slate-400 italic">Memuat peserta online...</span>
-                    </div>
-
-                    <div class="pt-2 border-t border-indigo-800/60 space-y-2">
-                        <button onclick="triggerAutoMatchmaking()" class="w-full py-3 bg-amber-500 hover:bg-amber-600 text-slate-900 font-extrabold rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-lg">
-                            <i class="fa-solid fa-arrows-spin text-base animate-spin"></i>
-                            <span>🎡 SPIN & TANDINGKAN SEMUA PESERTA (3 MENIT)</span>
-                        </button>
-                        <p class="text-[10px] text-indigo-200 text-center">Jika peserta ganjil, HR otomatis ikut duel sebagai penambal. Peserta akan langsung dialihkan ke room duel secara otomatis.</p>
+                        <h3 class="font-black text-base text-slate-800 font-heading">Papan Klasemen Nyata</h3>
+                        <p class="text-[10px] text-slate-400">Peringkat berdasarkan Total XP & Performa Real</p>
                     </div>
                 </div>
-
-                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-                    <div class="flex justify-between items-center">
-                        <h3 class="font-bold text-xs text-slate-800">Rekap Performa Peserta</h3>
-                        <button onclick="exportRecapCSV()" class="text-xs text-sky-600 font-bold hover:underline">Ekspor CSV</button>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs">
-                            <thead class="bg-slate-50 text-slate-500 uppercase text-[10px]">
-                                <tr>
-                                    <th class="p-2">Nama</th>
-                                    <th class="p-2">Tim</th>
-                                    <th class="p-2">XP</th>
-                                    <th class="p-2">CSAT</th>
-                                </tr>
-                            </thead>
-                            <tbody id="trainerTableBody" class="divide-y divide-slate-100"></tbody>
-                        </table>
-                    </div>
-                </div>
+                <button onclick="closeLeaderboardModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center text-xs">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
 
-        </main>
-    </div>
-
-    <!-- NOTIFIKASI PUSH ARENA DUEL (AUTO REDIRECT OVERLAY) -->
-    <div id="modalDuelPush" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-sm rounded-3xl p-6 space-y-4 shadow-2xl pop-in text-center relative border-4 border-amber-400">
-            <div class="w-16 h-16 bg-amber-500 text-slate-900 rounded-2xl mx-auto flex items-center justify-center text-3xl font-black shadow-lg animate-bounce">
-                ⚔️
+            <div id="leaderboardList" class="flex-1 overflow-y-auto space-y-2 pr-1 no-scrollbar">
+                <div class="text-center text-xs text-slate-400 py-6 italic">Memuat data klasemen dari server...</div>
             </div>
-            <h3 class="font-black text-lg text-slate-800 font-heading">PANGGILAN ARENA DUEL!</h3>
-            <p class="text-xs text-slate-600">Trainer HR telah memulai pertandingan. Kamu dijodohkan ke Room Duel!</p>
-            
-            <div class="bg-slate-100 p-3 rounded-2xl space-y-1 font-mono text-xs text-slate-700">
-                <div>Room Code: <b id="pushRoomCode" class="text-rose-600 text-sm">-----</b></div>
-                <div>Peran Kamu: <b id="pushUserRole" class="text-indigo-600">Agent CS</b></div>
-                <div>Durasi: <b class="text-amber-600">3 Menit / Ronde</b></div>
-            </div>
-
-            <button onclick="acceptPushDuel()" class="w-full py-3.5 bg-sky-600 hover:bg-sky-700 text-white font-black rounded-xl text-xs transition shadow-lg flex items-center justify-center gap-2">
-                <span>MASUK ARENA DUEL SEKARANG</span>
-                <i class="fa-solid fa-arrow-right"></i>
-            </button>
         </div>
     </div>
 
-    <!-- SCRIPT LOGIC (JAVASCRIPT) -->
+    <!-- JAVASCRIPT LOGIC -->
     <script>
         const CONFIG = {
-            CSAT_THRESHOLDS: [
-                { min: 90, emoji: '😍', label: 'Sangat Baik' },
-                { min: 75, emoji: '🙂', label: 'Baik' },
-                { min: 60, emoji: '😐', label: 'Sedang' },
-                { min: 40, emoji: '🙁', label: 'Kurang' },
-                { min: 0,  emoji: '😡', label: 'Tidak Baik' }
-            ],
-            // URL Google Apps Script Web App milik Anda
             APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbweYtU07PiB08hEI3ZaJrOXEiN6CfnbG88FfJ57y-YqhEavVMpQjmG0LLzSYhyC3qd7/exec',
-            TRAINER_PIN_DEFAULT: '1234'
+            TRAINER_PIN_DEFAULT: '1234',
+            LEVEL_TIMERS: { 1: 120, 2: 150, 3: 180, 4: 210, 5: 240, 6: 300 }
         };
 
         let currentUser = null;
@@ -392,34 +126,24 @@
         let currentQuestions = [];
         let currentQuestionIdx = 0;
         let levelScore = 0;
-        let audioEnabled = true;
-
-        // Matchmaking & Timer Variables
-        let currentDuelRoom = '';
-        let anonymousUserRole = '';
-        let currentRoleType = 'CS'; // 'CS' or 'AGEN'
-        let currentRound = 1;
-        let duelMessages = [];
-        let duelPollingTimer = null;
-        let userHeartbeatTimer = null;
-        let matchCountdownTimer = null;
-        let activePushMatchData = null;
-        let duelSecondsLeft = 180; // 3 Minutes
-
-        const SAMPLE_QUESTIONS = {
-            1: [
-                { id: 1, level: 1, tipe: 'pilihan_ganda', pertanyaan: 'Pilih penulisan kata depan yang benar:', opsi: ['di proses', 'diproses', 'di-proses'], kunci: 'diproses', penjelasan: 'Awalan "di-" pada kata kerja pasif ditulis serangkai.' },
-                { id: 2, level: 1, tipe: 'pilihan_ganda', pertanyaan: 'Pilih penulisan kata tempat yang benar:', opsi: ['dimana', 'di mana', 'di-mana'], kunci: 'di mana', penjelasan: 'Kata depan "di" penanda tempat ditulis terpisah.' }
-            ]
-        };
+        let levelCountdownTimer = null;
+        let levelSecondsLeft = 0;
 
         function handleLoginPeserta(event) {
             if (event) event.preventDefault();
-            const nama = document.getElementById('loginNama').value.trim();
+            const namaLengkap = document.getElementById('loginNamaLengkap').value.trim();
+            const namaPanggung = document.getElementById('loginNamaPanggung').value.trim();
             const tim = document.getElementById('loginTim').value;
             const kodeRoom = document.getElementById('loginKodeRoom').value.trim().toUpperCase();
 
-            currentUser = { nama: nama, tim: tim, xp: 0, streak: 0, levelProgress: { 1: true }, levelBestScores: {} };
+            currentUser = { 
+                namaLengkap: namaLengkap, 
+                namaPanggung: namaPanggung, 
+                nama: namaPanggung, // Digunakan untuk display & duel
+                tim: tim, 
+                xp: 0, 
+                levelProgress: { 1: true } 
+            };
             sessionStorage.setItem('cs_user', JSON.stringify(currentUser));
             updateUserHeader();
 
@@ -432,350 +156,90 @@
             }
         }
 
-        function startUserHeartbeat() {
-            if (!currentUser || currentUser.nama === "Trainer HR") return;
-            sendHeartbeat();
-            if (userHeartbeatTimer) clearInterval(userHeartbeatTimer);
-            userHeartbeatTimer = setInterval(sendHeartbeat, 5000); // Poll every 5s for online status & match invites
+        function updateUserHeader() {
+            if (!currentUser) return;
+            document.getElementById('mainHeader').classList.remove('hidden');
+            document.getElementById('userDisplayName').textContent = currentUser.namaPanggung || currentUser.nama;
+            document.getElementById('userTeamDisplay').textContent = currentUser.tim;
+            document.getElementById('userXP').textContent = `${currentUser.xp || 0} XP`;
+
+            const pName = document.getElementById('profileDisplayName');
+            const pSub = document.getElementById('profileSubDetail');
+            if (pName) pName.textContent = currentUser.namaPanggung;
+            if (pSub) pSub.textContent = `${currentUser.namaLengkap} • Divisi ${currentUser.tim}`;
+        }
+
+        function openLeaderboardModal() {
+            document.getElementById('modalLeaderboard').classList.remove('hidden');
+            fetchLeaderboardData();
+        }
+
+        function closeLeaderboardModal() {
+            document.getElementById('modalLeaderboard').classList.add('hidden');
+        }
+
+        function fetchLeaderboardData() {
+            const list = document.getElementById('leaderboardList');
+            list.innerHTML = '<div class="text-center text-xs text-slate-400 py-6 italic"><i class="fa-solid fa-spinner animate-spin"></i> Memuat data klasemen real...</div>';
+
+            if (!CONFIG.APPS_SCRIPT_URL) return;
+
+            fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getLeaderboard`)
+                .then(r => r.json())
+                .then(res => {
+                    const data = res.leaderboard || [];
+                    if (data.length === 0) {
+                        list.innerHTML = '<div class="text-center text-xs text-slate-400 py-6 italic">Belum ada data pengerjaan peserta.</div>';
+                        return;
+                    }
+
+                    list.innerHTML = '';
+                    data.forEach((item, index) => {
+                        let rankBadge = `<span class="font-bold text-xs text-slate-500 w-6 text-center">#${index + 1}</span>`;
+                        if (index === 0) rankBadge = `<span class="text-lg">🥇</span>`;
+                        if (index === 1) rankBadge = `<span class="text-lg">🥈</span>`;
+                        if (index === 2) rankBadge = `<span class="text-lg">🥉</span>`;
+
+                        const row = document.createElement('div');
+                        row.className = `p-3 rounded-2xl border flex items-center justify-between gap-2 ${
+                            currentUser && (currentUser.namaPanggung === item.namaPanggung || currentUser.namaLengkap === item.namaLengkap)
+                                ? 'bg-sky-50 border-sky-300 ring-2 ring-sky-400/30'
+                                : 'bg-slate-50 border-slate-200'
+                        }`;
+
+                        row.innerHTML = `
+                            <div class="flex items-center gap-2.5">
+                                ${rankBadge}
+                                <div>
+                                    <div class="font-bold text-xs text-slate-800">${item.namaPanggung || item.nama}</div>
+                                    <div class="text-[10px] text-slate-400 font-medium">${item.namaLengkap ? item.namaLengkap + ' • ' : ''}Divisi ${item.tim}</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-black text-xs text-sky-600">${item.totalXP} XP</div>
+                                <div class="text-[10px] font-bold text-slate-500">${item.csatEmoji || '😍'} CSAT</div>
+                            </div>
+                        `;
+                        list.appendChild(row);
+                    });
+                })
+                .catch(() => {
+                    list.innerHTML = '<div class="text-center text-xs text-rose-500 py-6">Gagal memuat klasemen server.</div>';
+                });
         }
 
         function sendHeartbeat() {
             if (!currentUser || !CONFIG.APPS_SCRIPT_URL) return;
-            fetch(`${CONFIG.APPS_SCRIPT_URL}?action=heartbeat&nama=${encodeURIComponent(currentUser.nama)}&tim=${encodeURIComponent(currentUser.tim)}`)
+            const url = `${CONFIG.APPS_SCRIPT_URL}?action=heartbeat&nama=${encodeURIComponent(currentUser.namaPanggung || currentUser.nama)}&namaLengkap=${encodeURIComponent(currentUser.namaLengkap || '')}&tim=${encodeURIComponent(currentUser.tim)}`;
+            fetch(url)
                 .then(r => r.json())
                 .then(data => {
                     if (data && data.matchAssignment) {
-                        // Trainee has been auto-matched by HR!
                         triggerMatchPushModal(data.matchAssignment);
                     }
                 })
                 .catch(() => {});
         }
-
-        function triggerMatchPushModal(assignment) {
-            if (currentDuelRoom === assignment.roomCode) return; // Already in room
-            activePushMatchData = assignment;
-            document.getElementById('pushRoomCode').textContent = assignment.roomCode;
-            document.getElementById('pushUserRole').textContent = assignment.role === 'CS' ? 'Agent CS (Penjawab)' : 'Agen Pulsa (Komplain)';
-            document.getElementById('modalDuelPush').classList.remove('hidden');
-        }
-
-        function acceptPushDuel() {
-            document.getElementById('modalDuelPush').classList.add('hidden');
-            if (activePushMatchData) {
-                startDuelSession(activePushMatchData.roomCode, activePushMatchData.role, 1);
-            }
-        }
-
-        function startDuelSession(code, role, round) {
-            currentDuelRoom = code;
-            currentRound = round || 1;
-            currentRoleType = role || 'CS';
-
-            showView('viewDuel');
-            document.getElementById('duelRoomCode').textContent = code;
-            document.getElementById('duelRoundBadge').textContent = `Ronde ${currentRound}/2`;
-
-            const randomId = Math.floor(100 + Math.random() * 900);
-            if (currentRoleType === 'CS') {
-                anonymousUserRole = `Agent CS #${randomId}`;
-                document.getElementById('duelEmotionTag').classList.add('hidden');
-            } else {
-                anonymousUserRole = `Agen Pulsa #${randomId}`;
-                document.getElementById('duelEmotionTag').classList.remove('hidden');
-            }
-
-            document.getElementById('duelUserRole').textContent = anonymousUserRole;
-
-            // Timer 3 Minutes (180 Seconds)
-            duelSecondsLeft = 180;
-            updateDuelTimerDisplay();
-            if (matchCountdownTimer) clearInterval(matchCountdownTimer);
-            matchCountdownTimer = setInterval(() => {
-                duelSecondsLeft--;
-                updateDuelTimerDisplay();
-                if (duelSecondsLeft <= 0) {
-                    clearInterval(matchCountdownTimer);
-                    endDuelRound();
-                }
-            }, 1000);
-
-            // Fetch Chat Messages
-            if (duelPollingTimer) clearInterval(duelPollingTimer);
-            fetchDuelMessages();
-            duelPollingTimer = setInterval(fetchDuelMessages, 1500);
-        }
-
-        function updateDuelTimerDisplay() {
-            const mins = Math.floor(duelSecondsLeft / 60);
-            const secs = duelSecondsLeft % 60;
-            document.getElementById('duelTimer').textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-        }
-
-        function endDuelRound() {
-            if (duelPollingTimer) clearInterval(duelPollingTimer);
-            showView('viewDuelRapor');
-
-            if (currentRound === 1) {
-                document.getElementById('btnNextDuelRound').textContent = "Lanjut ke Ronde 2 (Tukar Peran CS ⇄ Agen)";
-            } else {
-                document.getElementById('btnNextDuelRound').textContent = "Selesaikan Duel & Kembali ke Peta";
-            }
-        }
-
-        function startRoundTwoOrFinish() {
-            if (currentRound === 1) {
-                const nextRole = currentRoleType === 'CS' ? 'AGEN' : 'CS';
-                startDuelSession(currentDuelRoom, nextRole, 2);
-            } else {
-                goToMap();
-            }
-        }
-
-        function handleLoginTrainer(event) {
-            if (event) event.preventDefault();
-            const pin = document.getElementById('loginPinTrainer').value;
-            if (pin === CONFIG.TRAINER_PIN_DEFAULT) {
-                currentUser = { nama: "Trainer HR", tim: "HR / Trainer", xp: 999 };
-                showView('viewTrainer');
-                document.getElementById('mainHeader').classList.add('hidden');
-                loadOnlineUsers();
-            } else {
-                alert('PIN Trainer salah! (Default: 1234)');
-            }
-        }
-
-        function loadOnlineUsers() {
-            if (!CONFIG.APPS_SCRIPT_URL) return;
-            fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getOnlineUsers`)
-                .then(r => r.json())
-                .then(data => {
-                    const listContainer = document.getElementById('onlineUsersList');
-                    listContainer.innerHTML = '';
-                    const users = data.users || [];
-                    document.getElementById('onlineCountBadge').textContent = users.length;
-
-                    if (users.length === 0) {
-                        listContainer.innerHTML = '<span class="text-xs text-slate-400 italic">Belum ada peserta CS yang aktif online.</span>';
-                        return;
-                    }
-
-                    users.forEach(u => {
-                        const tag = document.createElement('span');
-                        tag.className = 'px-2.5 py-1 bg-indigo-800/80 text-indigo-100 rounded-lg text-xs font-semibold flex items-center gap-1 border border-indigo-700/50';
-                        tag.innerHTML = `<i class="fa-solid fa-circle text-[8px] text-emerald-400"></i> ${u.nama}`;
-                        listContainer.appendChild(tag);
-                    });
-                })
-                .catch(() => {});
-        }
-
-        function triggerAutoMatchmaking() {
-            if (!CONFIG.APPS_SCRIPT_URL) {
-                alert("Masukkan URL Google Apps Script di CONFIG untuk menjalankan auto matchmaking.");
-                return;
-            }
-
-            fetch(`${CONFIG.APPS_SCRIPT_URL}?action=autoMatchmake`)
-                .then(r => r.json())
-                .then(res => {
-                    if (res.status === 'success') {
-                        alert(`Matchmaking Berhasil! ${res.totalPairs} Pasangan dibuat. Peserta telah menerima notifikasi arena!`);
-                        if (res.hrJoined) {
-                            // HR included due to odd number
-                            alert("Jumlah peserta ganjil. HR otomatis dimasukkan ke Room: " + res.hrRoom);
-                            startDuelSession(res.hrRoom, res.hrRole, 1);
-                        }
-                    } else {
-                        alert("Gagal melakukan match: " + res.message);
-                    }
-                })
-                .catch(err => alert("Terjadi kesalahan koneksi matchmaking."));
-        }
-
-        function sendDuelMessage(event) {
-            if (event) event.preventDefault();
-            const input = document.getElementById('chatInput');
-            const val = input.value.trim();
-            if (!val) return;
-
-            const newMsg = {
-                sender: anonymousUserRole,
-                text: val,
-                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-            };
-
-            duelMessages.push(newMsg);
-            renderChatMessages();
-
-            if (CONFIG.APPS_SCRIPT_URL) {
-                fetch(CONFIG.APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    body: JSON.stringify({ action: 'sendChatMessage', room: currentDuelRoom, msg: newMsg })
-                }).catch(e => console.log(e));
-            }
-
-            input.value = '';
-        }
-
-        function fetchDuelMessages() {
-            if (!CONFIG.APPS_SCRIPT_URL || !currentDuelRoom) return;
-            fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getChatMessages&room=${currentDuelRoom}`)
-                .then(r => r.json())
-                .then(data => {
-                    if (data && Array.isArray(data.messages)) {
-                        duelMessages = data.messages;
-                        renderChatMessages();
-                    }
-                })
-                .catch(() => {});
-        }
-
-        function renderChatMessages() {
-            const box = document.getElementById('chatBox');
-            box.innerHTML = '<div class="text-center text-[11px] text-slate-400 my-2">-- Sesi Chat Roleplay Dimulai (Durasi 3 Menit) --</div>';
-
-            duelMessages.forEach(m => {
-                const isMe = m.sender === anonymousUserRole;
-                const msgDiv = document.createElement('div');
-                msgDiv.className = `p-2.5 rounded-xl max-w-[80%] text-xs shadow-sm space-y-0.5 ${
-                    isMe ? 'bg-sky-600 text-white ml-auto' : 'bg-white border border-slate-200 text-slate-800'
-                }`;
-                msgDiv.innerHTML = `
-                    <div class="text-[10px] opacity-75 font-bold">${m.sender}</div>
-                    <div>${m.text}</div>
-                    <div class="text-[9px] opacity-60 text-right">${m.time || ''}</div>
-                `;
-                box.appendChild(msgDiv);
-            });
-            box.scrollTop = box.scrollHeight;
-        }
-
-        function switchLoginTab(tab) {
-            if (tab === 'peserta') {
-                document.getElementById('formLoginPeserta').classList.remove('hidden');
-                document.getElementById('formLoginTrainer').classList.add('hidden');
-                document.getElementById('tabBtnPeserta').className = 'flex-1 py-2 rounded-lg bg-white text-sky-600 shadow-sm transition';
-                document.getElementById('tabBtnTrainer').className = 'flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-800 transition';
-            } else {
-                document.getElementById('formLoginPeserta').classList.add('hidden');
-                document.getElementById('formLoginTrainer').classList.remove('hidden');
-                document.getElementById('tabBtnTrainer').className = 'flex-1 py-2 rounded-lg bg-white text-indigo-600 shadow-sm transition';
-                document.getElementById('tabBtnPeserta').className = 'flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-800 transition';
-            }
-        }
-
-        function logoutTrainer() { showView('viewLogin'); }
-        function updateUserHeader() {
-            if (!currentUser) return;
-            document.getElementById('mainHeader').classList.remove('hidden');
-            document.getElementById('userDisplayName').textContent = currentUser.nama;
-            document.getElementById('userTeamDisplay').textContent = currentUser.tim;
-            document.getElementById('userXP').textContent = `${currentUser.xp} XP`;
-        }
-
-        function showView(viewId) {
-            ['viewLogin', 'viewMap', 'viewQuiz', 'viewResult', 'viewDuel', 'viewDuelRapor', 'viewTrainer'].forEach(v => {
-                const el = document.getElementById(v);
-                if (el) el.classList.add('hidden');
-            });
-            document.getElementById(viewId).classList.remove('hidden');
-        }
-
-        function goToMap() {
-            if (matchCountdownTimer) clearInterval(matchCountdownTimer);
-            if (duelPollingTimer) clearInterval(duelPollingTimer);
-            updateUserHeader();
-            showView('viewMap');
-            renderMapLevels();
-        }
-
-        function renderMapLevels() {
-            const container = document.getElementById('levelsContainer');
-            container.innerHTML = '';
-            const levelNames = ['Penulisan Kata', 'Kata Baku & Tidak Baku', 'Diksi Tepat & Terlarang', 'Kalimat Efektif', 'Perbaiki Kalimat CS', 'Situasi Nyata PPOB'];
-
-            for (let i = 1; i <= 6; i++) {
-                const unlocked = currentUser.levelProgress[i];
-                const btn = document.createElement('button');
-                btn.className = `w-full max-w-xs p-4 rounded-2xl flex items-center justify-between border-2 transition ${
-                    unlocked ? 'bg-white border-sky-500 shadow-md hover:bg-sky-50' : 'bg-slate-100 border-slate-300 opacity-60 cursor-not-allowed'
-                }`;
-                btn.disabled = !unlocked;
-                btn.onclick = () => startLevel(i);
-                btn.innerHTML = `
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-xl ${unlocked ? 'bg-sky-600 text-white' : 'bg-slate-300 text-slate-500'} flex items-center justify-center font-black">
-                            ${unlocked ? i : '<i class="fa-solid fa-lock"></i>'}
-                        </div>
-                        <div class="text-left">
-                            <div class="font-bold text-sm text-slate-800">Level ${i}: ${levelNames[i-1]}</div>
-                            <div class="text-xs text-slate-400">${unlocked ? 'Tersedia' : 'Terkunci'}</div>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(btn);
-            }
-        }
-
-        function startLevel(lvl) {
-            currentLevel = lvl;
-            currentQuestions = SAMPLE_QUESTIONS[lvl] || [
-                { id: 99, level: lvl, tipe: 'pilihan_ganda', pertanyaan: 'Contoh pertanyaan PPOB dasar:', opsi: ['Pilihan A', 'Pilihan B'], kunci: 'Pilihan A', penjelasan: 'Penjelasan latihan dasar PPOB.' }
-            ];
-            currentQuestionIdx = 0;
-            levelScore = 0;
-            showView('viewQuiz');
-            renderQuestion();
-        }
-
-        function renderQuestion() {
-            const q = currentQuestions[currentQuestionIdx];
-            document.getElementById('quizLevelBadge').textContent = `Level ${currentLevel}`;
-            document.getElementById('quizProgressText').textContent = `Soal ${currentQuestionIdx + 1} / ${currentQuestions.length}`;
-            document.getElementById('questionText').textContent = q.pertanyaan;
-
-            const container = document.getElementById('answerContainer');
-            container.innerHTML = '';
-            document.getElementById('feedbackCard').classList.add('hidden');
-
-            q.opsi.forEach(opt => {
-                const btn = document.createElement('button');
-                btn.className = 'w-full text-left p-3.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-sky-50 hover:border-sky-300 transition text-xs font-semibold';
-                btn.textContent = opt;
-                btn.onclick = () => checkAnswer(opt);
-                container.appendChild(btn);
-            });
-        }
-
-        function checkAnswer(userAns) {
-            const q = currentQuestions[currentQuestionIdx];
-            const isCorrect = userAns === q.kunci;
-            if (isCorrect) levelScore++;
-
-            const feedbackCard = document.getElementById('feedbackCard');
-            feedbackCard.classList.remove('hidden');
-            feedbackCard.className = isCorrect ? 'bg-emerald-50 border border-emerald-200 p-4 rounded-xl space-y-2 pop-in' : 'bg-rose-50 border border-rose-200 p-4 rounded-xl space-y-2 pop-in';
-            document.getElementById('feedbackIcon').textContent = isCorrect ? '✅' : '❌';
-            document.getElementById('feedbackTitle').textContent = isCorrect ? 'Jawaban Tepat!' : 'Kurang Tepat';
-            document.getElementById('feedbackText').textContent = q.penjelasan;
-        }
-
-        function nextQuestion() {
-            currentQuestionIdx++;
-            if (currentQuestionIdx < currentQuestions.length) {
-                renderQuestion();
-            } else {
-                finishLevel();
-            }
-        }
-
-        function finishLevel() { showView('viewResult'); }
-        function exportRecapCSV() { alert('Mengunduh rekap CSV peserta...'); }
-        function openLeaderboard() { alert('Menampilkan klasemen...'); }
-        function openBadgesModal() { alert('Menampilkan lencana...'); }
-        function toggleAudio() { audioEnabled = !audioEnabled; }
     </script>
 </body>
 </html>
