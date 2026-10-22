@@ -153,9 +153,52 @@
           </button>
         </div>
         <div id="matchResult" class="text-xs space-y-1"></div>
+        <div id="duelBoard" class="text-xs space-y-1"></div>
+      </section>
+
+      <!-- 6. ARENA DUEL -->
+      <section id="viewArena" class="hidden -m-4 p-4 min-h-[85vh] bg-gradient-to-b from-stone-950 via-red-950 to-stone-950 text-amber-50 space-y-3">
+        <div class="flex items-center justify-between text-[10px] font-bold tracking-widest text-amber-300">
+          <span>🏛️ ARENA CS DUEL • <span id="arRoom"></span></span>
+          <button id="btnMute" onclick="toggleMute()" class="text-base">🔔</button>
+        </div>
+        <div class="text-center">
+          <div id="arPhase" class="text-xs font-black tracking-widest text-amber-400">⏳ BERSIAP</div>
+          <div id="arClock" class="text-5xl font-black tabular-nums text-white drop-shadow">00:00</div>
+          <div id="arScenario" class="text-[11px] text-amber-200/80 italic"></div>
+        </div>
+        <div class="grid grid-cols-2 gap-2 text-center">
+          <div class="bg-sky-950/70 border border-sky-500/50 rounded-xl p-2">
+            <div class="text-2xl">🛡️</div><div class="text-[10px] text-sky-300 font-bold tracking-wider">CS</div>
+            <div id="arCsName" class="text-xs font-bold truncate"></div>
+            <div id="arCsPts" class="text-2xl font-black text-sky-300">0</div>
+          </div>
+          <div class="bg-red-950/70 border border-red-500/50 rounded-xl p-2">
+            <div class="text-2xl">🔥</div><div class="text-[10px] text-red-300 font-bold tracking-wider">AGEN</div>
+            <div id="arAgenName" class="text-xs font-bold truncate"></div>
+            <div id="arAgenPts" class="text-2xl font-black text-red-300">0</div>
+          </div>
+        </div>
+        <div>
+          <div class="h-3 rounded-full bg-red-600 overflow-hidden border border-amber-900"><div id="arBar" class="h-full bg-sky-500 transition-all duration-500" style="width:50%"></div></div>
+          <div id="arDom" class="text-center text-[11px] font-bold mt-1 text-amber-200">⚖️ Imbang</div>
+        </div>
+        <div id="arBrief" class="text-[11px] bg-black/30 border border-amber-900/50 rounded-lg p-2 text-amber-100"></div>
+        <div id="arChat" class="h-64 overflow-y-auto space-y-2 bg-black/30 rounded-xl p-2 border border-amber-900/50"></div>
+        <div class="flex gap-2">
+          <input id="arInput" type="text" maxlength="400" disabled placeholder="Ketik balasan / keluhanmu..." onkeydown="if(event.key==='Enter')sendDuelMsg()" class="flex-1 px-3 py-2 text-xs rounded-lg bg-stone-900 border border-amber-900 text-white outline-none focus:ring-2 focus:ring-amber-500">
+          <button id="arSend" disabled onclick="sendDuelMsg()" class="px-3 py-2 bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-stone-950 font-black text-xs rounded-lg">Serang ⚔️</button>
+        </div>
       </section>
 
     </main>
+  </div>
+
+  <!-- OVERLAY ARENA & BANNER DUEL -->
+  <div id="arOverlay" class="fixed inset-0 z-40 bg-black/80 backdrop-blur-sm flex items-center justify-center p-6 text-amber-50 hidden"></div>
+  <div id="duelBanner" class="fixed top-0 inset-x-0 z-40 bg-amber-500 text-stone-950 text-xs font-bold p-2 flex items-center justify-center gap-3 hidden">
+    ⚔️ Duelmu dimulai! <span id="duelBannerRoom"></span>
+    <button onclick="enterArena(duelPendingRoom)" class="px-2 py-1 bg-stone-950 text-amber-300 rounded-lg">Masuk Arena</button>
   </div>
 
   <!-- MODAL KLASEMEN -->
@@ -171,7 +214,7 @@
 
   <script>
     const CONFIG = {
-      APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbweYtU07PiB08hEI3ZaJrOXEiN6CfnbG88FfJ57y-YqhEavVMpQjmG0LLzSYhyC3qd7/exec"
+      APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbys5_JauJAaH2Pp4buu7kWIiTzDK3Ncar5rxR4f3W0AcTCy1dT91cTeE5l-R0nuOo5T/exec"
     };
 
     let currentUser = null;
@@ -182,6 +225,9 @@
     let heartbeatInterval = null;
     let answered = false;   // kunci agar satu soal hanya dihitung sekali
     let finished = false;   // kunci agar level hanya diselesaikan sekali
+
+    function mc(id, q, k, w, p) { return { id, tipe:"pilihan_ganda", q, ops:[k, ...w], k, p }; }
+    function mn(id, q, k, p, kw, no) { return { id, tipe:"ketik_manual", q, k, p, kw, no }; }
 
     const LEVEL_QUESTIONS = {
       1: [
@@ -201,21 +247,195 @@
         { id:"L2_5", tipe:"pilihan_ganda", q:"Kata ajakan santun baku kepada agen:", ops:["silakan","silahkan","disilahkan","disilakan"], k:"silakan", p:"Bentuk baku tanpa huruf 'h' yaitu 'silakan'." }
       ],
       3: [
-        { id:"L3_1", tipe:"pilihan_ganda", q:"Manakah diksi sapaan CS yang paling ramah dan sopan?", ops:["Mohon ditunggu sebentar ya, Kak. Kami bantu cek transaksi pulsa Kakak.","Tunggu ya","Sebentar lagi dicek","Nanti diinfokan"], k:"Mohon ditunggu sebentar ya, Kak. Kami bantu cek transaksi pulsa Kakak.", p:"Gunakan sapaan hangat dan kepastian tindakan." },
-        { id:"L3_2", tipe:"pilihan_ganda", q:"Hindari kalimat terlarang yang menyalahkan agen. Pilih respons terbaik:", ops:["Sepertinya ada penyesuaian pada nomor tujuan, Kak. Boleh dibantu cek kembali?","Itu salah Kakak sendiri","Kakak keliru masukkan nomor","Prosedurnya begitu"], k:"Sepertinya ada penyesuaian pada nomor tujuan, Kak. Boleh dibantu cek kembali?", p:"Jangan pernah menyalahkan agen secara langsung." }
+        mc("L3_1","Agen menulis: 'Saldo saya sudah terpotong tapi pulsa belum masuk, gimana sih ini!' Respons CS yang paling tepat adalah:",
+          "Mohon maaf atas kendalanya, Kak. Boleh kirimkan ID transaksinya agar kami cek langsung?",
+          ["Mohon bersabar ya, Kak. Sistem kami memang sering lambat di jam sibuk seperti sekarang ini.",
+           "Kami paham Kakak kesal. Pulsanya pasti masuk kok, Kak, tinggal ditunggu saja beberapa saat lagi.",
+           "Terima kasih sudah menghubungi kami, Kak. Silakan cek dulu riwayat transaksinya di aplikasi Kakak."],
+          "Respons terbaik meminta maaf lalu langsung bertindak dengan data yang jelas. 'Pasti masuk' adalah janji yang belum diverifikasi, 'sistem lambat' hanyalah dalih, dan menyuruh agen cek sendiri memindahkan beban ke agen."),
+        mc("L3_2","Agen mengeluh: 'Sudah tiga kali saya tanya, jawabannya muter-muter terus!' Respons yang paling menunjukkan empati sekaligus tanggung jawab:",
+          "Mohon maaf Kakak harus bertanya berulang. Saya tangani sampai tuntas dan kabari Kakak maksimal 15 menit lagi.",
+          ["Kami paham Kakak kesal, namun jawaban kami sebelumnya sudah sesuai prosedur yang berlaku saat ini, Kak.",
+           "Mohon maaf, Kak. Mungkin penjelasan rekan kami sebelumnya kurang dipahami, jadi saya jelaskan ulang dengan lebih sederhana.",
+           "Terima kasih atas kesabarannya, Kak. Kami pastikan tim terkait segera menindaklanjuti laporan Kakak secepatnya."],
+          "Empati yang efektif mengakui pengalaman agen, mengambil kepemilikan masalah, dan memberi tenggat konkret. 'Sesuai prosedur' dan 'kurang dipahami' bernada membela diri; 'segera' tanpa waktu tidak bisa dipegang agen."),
+        mc("L3_3","Agen meminta pengembalian saldo untuk transaksi yang statusnya sudah SUKSES. Respons yang jujur, tegas, dan tetap membantu:",
+          "Transaksi yang sudah sukses memang tidak dapat dibatalkan, Kak. Kami bantu telusuri kendala di nomor tujuannya ya.",
+          ["Mohon maaf, Kak, hal itu bukan wewenang kami. Silakan hubungi pihak lain yang lebih berwenang menanganinya.",
+           "Sesuai aturan, transaksi sukses tidak bisa dikembalikan dengan alasan apa pun, Kak. Mohon dipahami ya.",
+           "Kami coba usahakan dulu ya, Kak. Kalau memang ada kemungkinan dikembalikan, nanti pasti kami kabari lewat chat ini."],
+          "Tolak dengan alasan yang jelas, lalu tawarkan hal yang masih bisa dibantu. Harapan palsu merusak kepercayaan lebih parah daripada penolakan yang jujur."),
+        mc("L3_4","Agen mengatakan masalahnya sudah teratasi. Cara menutup percakapan yang paling tepat:",
+          "Syukurlah, Kak. Apakah penjelasan tadi sudah menjawab kendala Kakak, atau masih ada yang ingin kami bantu?",
+          ["Baik, Kak, kendalanya sudah kami proses. Chat ini kami tutup ya, terima kasih sudah menghubungi kami.",
+           "Semoga membantu ya, Kak. Jangan lupa memberi penilaian layanan kami setelah percakapan ini selesai.",
+           "Siap, Kak. Jika masih ada kendala serupa, silakan hubungi kami kembali kapan saja."],
+          "Pastikan tuntas dari sisi agen sebelum menutup. Menutup sepihak atau langsung meminta rating terkesan mengejar metrik, dan pernyataan 'silakan hubungi kembali' tidak memastikan masalahnya benar-benar selesai."),
+        mc("L3_5","Agen: 'Kenapa sih server kalian sering error?' Respons yang jujur, tidak melempar kesalahan, dan tidak mengabaikan keluhan:",
+          "Mohon maaf atas ketidaknyamanannya, Kak. Saat ini ada gangguan dari penyedia layanan dan kami terus memantau sampai normal.",
+          ["Gangguan ini bukan dari kami, Kak, tapi dari pihak operator. Jadi kami tidak bisa berbuat apa-apa untuk saat ini.",
+           "Server kami sebenarnya baik-baik saja, Kak. Mungkin sinyal atau perangkat Kakak yang sedang bermasalah.",
+           "Kami sedang melakukan perbaikan sistem, Kak. Mohon dimaklumi karena hal seperti ini memang sering terjadi."],
+          "Jelaskan penyebab secara faktual, akui dampaknya, dan tunjukkan tindak lanjut. 'Bukan dari kami' melempar tanggung jawab, menyalahkan perangkat agen tidak terverifikasi, dan 'sering terjadi' membenarkan keluhan tanpa solusi."),
+        mc("L3_6","Agen yang sangat emosi menulis: 'CS goblok, kerja nggak becus!' Langkah pertama yang paling tepat:",
+          "Kami mengerti Kakak sangat kesal. Mari kita selesaikan bersama, boleh kami minta ID transaksinya, Kak?",
+          ["Mohon gunakan bahasa yang sopan, Kak. Kami tidak dapat melayani jika masih menggunakan kata-kata kasar seperti itu.",
+           "Kami mohon maaf jika pelayanan kami mengecewakan, Kak. Mohon tenang dulu ya, Kak, supaya kami bisa membantu.",
+           "Baik, Kak. Keluhan Kakak kami catat dan akan kami teruskan kepada atasan untuk ditindaklanjuti."],
+          "Redakan emosi lebih dulu dengan mengakui perasaan lalu arahkan ke solusi. Batasan sopan santun baru ditegaskan bila kata kasar berlanjut. 'Mohon tenang' justru memancing emosi, dan menunda ke atasan membuat masalah tidak tersentuh."),
+        mc("L3_7","Transaksi agen berstatus pending dan penyedia belum memberi kepastian. Kalimat estimasi yang jujur dan tidak berlebihan:",
+          "Transaksi Kakak sedang kami telusuri ke provider. Biasanya selesai dalam 1x24 jam dan kami kabari bila ada perubahan.",
+          ["Pasti masuk hari ini, Kak. Kami jamin tidak akan lebih dari satu jam lagi dari sekarang.",
+           "Kami usahakan secepatnya ya, Kak, mohon jangan khawatir. Saldo Kakak aman di sistem kami.",
+           "Mohon ditunggu saja, Kak. Pending seperti ini biasanya akan selesai dengan sendirinya nanti."],
+          "Gunakan rentang yang bisa dipenuhi, sebutkan tindakan yang sedang dilakukan, dan janjikan kabar. Jaminan waktu yang tidak pasti dan 'selesai sendiri' sama-sama berisiko membuat CS ingkar."),
+        mc("L3_8","Agen mengajukan komplain serius. Gaya penulisan yang paling profesional dan hangat:",
+          "Mohon maaf atas kendalanya, Kak. Kami cek sekarang dan kabari hasilnya segera.",
+          ["Mohon maaf banget ya Kak 🙏😭 kami bakal langsung cek sekarang juga, tunggu kabar dari kami ya!!",
+           "MOHON MAAF KAK. KAMI CEK SEKARANG JUGA, MOHON DITUNGGU HASILNYA SEBENTAR LAGI.",
+           "Mohon maaf, Kak. Atas permasalahan yang dialami, akan segera kami lakukan pengecekan sebagaimana mestinya."],
+          "Pada komplain serius, hindari emoji berlebihan, huruf kapital (terbaca membentak), dan kalimat pasif kaku yang menyembunyikan siapa yang bertindak. Kalimat singkat, aktif, dan hangat paling efektif."),
+        mc("L3_9","Agen menceritakan masalah panjang dan berputar-putar di satu pesan. Respons yang paling menunjukkan mendengarkan aktif:",
+          "Saya rangkum ya, Kak: saldo terpotong dan pulsa belum masuk ke nomor tujuan. Apakah sudah sesuai?",
+          ["Terima kasih penjelasannya, Kak. Kami teruskan ke tim terkait, mohon ditunggu informasi selanjutnya dari kami.",
+           "Maaf, Kak, bisa disingkat saja masalahnya apa? Agar kami dapat segera memproses laporannya sekarang.",
+           "Kami sudah paham masalah Kakak. Silakan kirim bukti transfer dan ID transaksinya agar bisa kami lanjutkan."],
+          "Merangkum ulang dan meminta konfirmasi membuktikan CS menangkap inti masalah serta mencegah salah paham. Meminta agen 'menyingkat' terdengar mengabaikan, dan langsung meminta data tanpa konfirmasi berisiko salah sasaran."),
+        mc("L3_10","Agen: 'Boleh nggak saya ganti nomor tujuan padahal transaksi sebelumnya masih pending?' Jawaban yang paling aman dan jelas:",
+          "Belum bisa, Kak, selama transaksi masih pending. Jika gagal, saldo kembali dan Kakak bisa transaksi ulang ke nomor baru.",
+          ["Boleh, Kak, silakan langsung transaksi ulang ke nomor yang baru sekarang juga tanpa perlu menunggu hasilnya.",
+           "Sebaiknya jangan dulu, Kak. Nanti bisa saja terjadi hal yang tidak diinginkan pada transaksi Kakak tersebut.",
+           "Kami tidak menyarankan, Kak. Tetapi keputusan sepenuhnya kembali pada Kakak sebagai pemilik transaksi."],
+          "Transaksi ulang saat pending berisiko saldo terpotong ganda. Jawaban terbaik tegas, memberi alasan, dan menunjukkan langkah berikutnya. 'Hal yang tidak diinginkan' terlalu samar dan 'keputusan Kakak' melepas tanggung jawab CS.")
       ],
       4: [
-        { id:"L4_1", tipe:"pilihan_ganda", q:"Pilih kalimat yang paling tegas dan bebas dari makna ganda (ambigu):", ops:["Khusus hari ini, transaksi tidak dapat diproses.","Transaksi tidak bisa diproses hari ini.","Hari ini transaksi belum diproses."], k:"Khusus hari ini, transaksi tidak dapat diproses.", p:"Hindari kalimat yang bisa ditafsirkan sebagai gangguan permanen." }
+        mc("L4_1","Pilih kalimat yang paling bebas dari makna ganda:",
+          "Saldo untuk transaksi yang gagal sudah dikembalikan hari ini.",
+          ["Saldo agen yang bermasalah dan transaksi gagal dikembalikan hari ini secara otomatis oleh sistem.",
+           "Transaksi yang gagal hari ini, saldo Kakak kemungkinan akan dikembalikan oleh sistem kami.",
+           "Saldo transaksi gagal akan atau sudah dikembalikan hari ini, mohon dicek kembali ya, Kak."],
+          "Kalimat efektif menyebut apa yang terjadi, kepada siapa, dan kapan secara pasti. Pilihan lain membuat pembaca bingung apakah yang dikembalikan saldo atau transaksi, dan apakah sudah atau baru akan."),
+        mc("L4_2","Pilih kalimat batas waktu yang tidak menimbulkan salah tafsir:",
+          "Transaksi yang masuk setelah pukul 21.00 WIB akan diproses besok pukul 08.00 WIB.",
+          ["Transaksi yang masuk setelah pukul 21.00 akan kami proses pada pukul 08.00 sesuai jadwal operasional.",
+           "Transaksi malam hari akan diproses esok hari pada pagi hari, sesuai dengan antrean yang berlaku.",
+           "Transaksi di luar jam layanan akan diproses pada jam operasional berikutnya, Kak, mohon ditunggu."],
+          "Sebutkan zona waktu dan hari. '08.00' tanpa keterangan hari bisa dibaca hari ini atau besok, sedangkan 'malam hari' dan 'jam operasional berikutnya' terlalu kabur untuk dijadikan pegangan."),
+        mc("L4_3","Pilih kalimat yang paling efektif (tidak boros dan tidak pleonasme):",
+          "Transaksi Kakak sudah berhasil, SN-nya tertera di riwayat transaksi.",
+          ["Dengan ini kami informasikan bahwa transaksi Kakak telah berhasil diselesaikan dengan sukses oleh sistem.",
+           "Transaksi Kakak telah sukses berhasil, dan bukti SN-nya dapat dicek kembali di riwayat transaksi Kakak.",
+           "Berhasilnya transaksi Kakak sudah terjadi, silakan Kakak cek SN-nya pada menu riwayat transaksi."],
+          "'Berhasil dengan sukses' dan 'sukses berhasil' adalah pleonasme. Pilihan terakhir memakai bentuk berputar. Kalimat efektif langsung, lugas, dan berisi informasi yang dibutuhkan."),
+        mc("L4_4","Pilih kalimat yang menyampaikan batasan dengan tegas namun tetap positif:",
+          "Transaksi dapat dilakukan setiap hari pukul 05.00-22.00 WIB, Kak.",
+          ["Kakak tidak bisa melakukan transaksi di atas pukul 22.00 WIB karena layanan sudah ditutup.",
+           "Mohon jangan melakukan transaksi lewat pukul 22.00 WIB ya, Kak, karena tidak akan kami proses.",
+           "Setelah pukul 22.00 WIB, Kakak belum dapat bertransaksi. Mohon dimaklumi ya, Kak, atas hal ini."],
+          "Menyebut apa yang bisa dilakukan lebih jelas dan lebih ramah daripada deretan larangan, tanpa mengurangi ketegasan."),
+        mc("L4_5","Agen A menghubungi Agen B karena salah satunya belum menerima pulsa. Pilih kalimat yang jelas siapa yang belum menerima:",
+          "Karena belum menerima pulsa, Agen A menghubungi Agen B.",
+          ["Agen A menghubungi Agen B karena dia belum menerima pulsa yang dikirimkan kemarin sore.",
+           "Agen A, yang menghubungi Agen B, dan dia juga belum menerima pulsa dari transaksi tersebut.",
+           "Agen A menghubungi Agen B yang belum menerima pulsanya, sebab dia merasa sudah melakukan transaksi."],
+          "Kata 'dia' pada beberapa kalimat bisa merujuk Agen A atau B. Menempatkan alasan di awal dengan subjek yang jelas menghilangkan ambiguitas rujukan."),
+        mc("L4_6","Pilih kalimat tindak lanjut yang menunjukkan tanggung jawab dan bisa dipantau agen:",
+          "Laporan Kakak sudah kami teruskan ke tim teknis, kabar terbaru kami sampaikan pukul 15.00 WIB.",
+          ["Laporan dari Kakak sudah diteruskan ke tim teknis terkait dan nanti akan ditindaklanjuti sesuai antrean yang ada.",
+           "Tim teknis akan menghubungi Kakak jika laporan tersebut memang memerlukan tindak lanjut yang lebih jauh lagi.",
+           "Kami sudah mencatat laporan Kakak dan akan segera menginformasikannya kepada pihak-pihak yang berkepentingan."],
+          "Kalimat aktif ('kami teruskan') dengan tenggat jelas membuat agen tahu siapa bertindak dan kapan kabar datang. Kalimat pasif dan syarat 'jika memang' menyembunyikan pelaku dan kepastian."),
+        mc("L4_7","Gangguan HANYA terjadi pada produk pulsa, produk lain normal. Pilih kalimat yang menyampaikannya paling akurat:",
+          "Gangguan hanya terjadi pada produk pulsa, produk lainnya berjalan normal.",
+          ["Hanya gangguan pada produk pulsa yang sedang kami tangani, Kak, mohon ditunggu perkembangannya.",
+           "Gangguan pulsa sedang terjadi, sedangkan produk lainnya kemungkinan besar masih berjalan normal, Kak.",
+           "Produk pulsa saja yang terganggu, kecuali bila ada produk lain yang juga ternyata sedang terkendala."],
+          "Posisi 'hanya' mengubah makna. Pilihan lain bisa dibaca 'kami hanya menangani pulsa', ragu soal produk lain, atau membuka kemungkinan gangguan lain."),
+        mc("L4_8","Agen bertanya: 'Kapan saldo saya kembali?' Jawaban yang paling efektif (informasi utama di awal):",
+          "Saldo kembali maksimal 1x24 jam, Kak. Kami sudah cek ke provider dan statusnya gagal.",
+          ["Terima kasih telah menunggu, Kak. Setelah pengecekan ke provider, kami informasikan saldo kembali maksimal 1x24 jam.",
+           "Setelah kami cek ke provider, ternyata status transaksi gagal sehingga saldo akan dikembalikan kira-kira dalam waktu satu hari.",
+           "Mohon maaf atas penantiannya, Kak. Saldo akan dikembalikan sesegera mungkin oleh sistem kami ke akun Kakak."],
+          "Pertanyaan 'kapan' dijawab di kalimat pertama, lalu alasannya. Pilihan lain menunda jawaban dengan pembuka panjang atau memberi waktu yang tidak pasti ('kira-kira', 'sesegera mungkin')."),
+        mc("L4_9","Anda perlu memverifikasi nomor tujuan. Pilih pertanyaan yang tidak bernada menuduh:",
+          "Boleh kami bantu cocokkan nomor tujuannya dengan yang tertera di sistem, Kak?",
+          ["Apakah Kakak yakin nomor tujuan yang dimasukkan tadi sudah benar sebelum melakukan transaksi?",
+           "Kenapa nomor tujuannya bisa salah, Kak? Biasanya Kakak memasukkan nomornya dengan cara bagaimana?",
+           "Kakak sudah mengecek nomornya sebelum transaksi, bukan? Mohon dipastikan lagi nomornya ya."],
+          "Pertanyaan verifikasi sebaiknya berbentuk tawaran bantuan. 'Apakah yakin', 'kenapa bisa salah', dan 'bukan?' mengandung praduga bahwa agen lalai."),
+        mc("L4_10","Pilih kalimat estimasi yang paling tegas dan bisa dipegang agen:",
+          "Selesai paling lambat besok pukul 17.00 WIB, Kak.",
+          ["Dalam 1x24 jam, Kak, namun tidak termasuk hari libur dan tanggal merah yang ditetapkan pemerintah.",
+           "Maksimal satu hari kerja, Kak, kecuali apabila ditemukan kendala tambahan dari pihak provider.",
+           "Sekitar 1-2 hari, Kak, tergantung antrean penanganan yang sedang berjalan di pihak provider."],
+          "Estimasi yang baik punya batas tegas (hari dan jam). '1x24 jam', 'satu hari kerja', dan rentang '1-2 hari' tetap membuat agen menebak kapan tepatnya.")
       ],
       5: [
-        { id:"L5_1", tipe:"ketik_manual", q:"Perbaiki kalimat buruk berikut agar lebih santun & efektif: 'Udah dibilang pending, tunggu aja nanti juga masuk sendiri!'", k:"Mohon maaf atas ketidaknyamanannya, Kak. Transaksi saat ini sedang diproses. Mohon ditunggu paling lambat 1x24 jam ya, Kak.", p:"Sebutkan permintaan maaf, bahasa santun, dan estimasi konkret." }
+        mn("L5_1","Perbaiki kalimat buruk berikut agar santun, empatik, dan memberi estimasi konkret: 'Udah dibilang pending, tunggu aja nanti juga masuk sendiri!'",
+          "Mohon maaf atas ketidaknyamanannya, Kak. Transaksi saat ini sedang diproses. Mohon ditunggu paling lambat 1x24 jam ya, Kak.",
+          "Unsur: permintaan maaf, bahasa santun, sapaan Kak, dan estimasi waktu konkret. Hindari kata kasual/menyalahkan.",
+          ["maaf","mohon|silakan|ditunggu","1x24|\\d+\\s*(jam|menit)|paling lambat|maksimal","\\bkak\\b"],
+          ["\\b(aja|udah|nggak|gak)\\b"]),
+        mn("L5_2","Perbaiki kalimat berikut tanpa menyalahkan agen dan tetap menawarkan solusi: 'Itu salah Kakak sendiri, nomornya salah masukin. Makanya teliti dong sebelum transaksi!'",
+          "Mohon maaf atas kendalanya, Kak. Sepertinya ada ketidaksesuaian pada nomor tujuan. Boleh kami bantu cocokkan nomornya dan cek solusinya?",
+          "Unsur: minta maaf/empati, bahasa netral tentang nomor tujuan, dan tawaran bantuan konkret. Jangan ada kalimat yang menyalahkan.",
+          ["maaf|terima kasih","nomor","bantu|cek|telusuri","\\bkak\\b"],
+          ["salah kakak","teliti dong","makanya","salah masukin"]),
+        mn("L5_3","Perbaiki kalimat berikut: 'Nggak bisa refund. Transaksi udah sukses, ya udah itu aturannya.' Pertahankan penolakan, tetapi tambahkan empati dan alternatif bantuan.",
+          "Mohon maaf, Kak, kami memahami kekecewaan Kakak. Transaksi yang sudah berhasil tidak dapat dibatalkan, namun kami bantu telusuri kendala di nomor tujuannya ya.",
+          "Unsur: empati, alasan penolakan yang jelas (transaksi sudah sukses), dan alternatif bantuan. Penolakan tetap tegas.",
+          ["maaf|memahami|mengerti","sukses|berhasil","tidak (dapat|bisa)|belum (dapat|bisa)","bantu|telusuri|cek"],
+          ["\\b(nggak|gak|udah)\\b"]),
+        mn("L5_4","Agen menulis: 'Dari tadi nggak ada kabar! Saya rugi, mau tanggung jawab nggak?!' Tulis respons Anda yang memuat empati, tindakan, dan tenggat waktu, tanpa janji berlebihan.",
+          "Mohon maaf Kakak harus menunggu tanpa kabar, kami mengerti ini merugikan Kakak. Saya cek transaksinya sekarang, boleh kirim ID transaksinya? Kabar terbaru kami sampaikan paling lambat 15 menit lagi.",
+          "Unsur: empati, tindakan konkret (cek/minta ID), tenggat waktu terukur, dan tanpa janji pasti berhasil.",
+          ["maaf|mengerti|memahami","ID|SN|data|nomor","cek|telusuri|tindak","\\d+\\s*(menit|jam)|pukul|maksimal|paling lambat"],
+          ["pasti masuk","jamin","100%"]),
+        mn("L5_5","Anda harus mengeskalasi kasus ke tim teknis. Tulis pesan kepada agen yang menjelaskan eskalasi tanpa terdengar melempar tanggung jawab.",
+          "Kami sudah meneruskan kendala Kakak ke tim teknis untuk ditangani lebih lanjut dan saya tetap memantau prosesnya. Kabar terbaru kami sampaikan pukul 15.00 WIB, Kak.",
+          "Unsur: CS tetap memegang tanggung jawab (kami/saya), menyebut tindakan eskalasi, tenggat kabar, dan komitmen memantau.",
+          ["\\b(kami|saya)\\b","teruskan|eskalasi|tim teknis","pukul|jam|menit|\\d+","kabar|kabari|informasikan|pantau"],
+          ["bukan wewenang","bukan urusan","bukan tugas"])
       ],
       6: [
-        { id:"L6_1", tipe:"pilihan_ganda", q:"Skenario: Saldo agen terpotong tetapi pulsa belum masuk & transaksi pending. Urutkan penanganan terbaik:", ops:["Sapa & Maaf -> Minta Data ID & SN -> Beri Estimasi Waktu -> Solusi & Penutup","Langsung suruh tunggu -> Penutup"], k:"Sapa & Maaf -> Minta Data ID & SN -> Beri Estimasi Waktu -> Solusi & Penutup", p:"Alur CS standar: Empati, Verifikasi, Solusi, Penutup." }
+        mc("L6_1","Tiga chat masuk bersamaan: (A) agen baru bertanya cara deposit, (B) saldo terpotong Rp5 juta dan pulsa pending 40 menit, (C) agen mengancam pindah karena komplain kemarin belum dibalas. Penanganan terbaik:",
+          "Kirim sapaan singkat dan estimasi ke ketiganya, tangani B dahulu, lalu C, lalu A.",
+          ["Tangani A dahulu karena paling cepat selesai, lalu B, lalu C, supaya jumlah chat yang menunggu segera berkurang.",
+           "Tangani C dahulu karena mengancam pindah, kemudian B dan A menyusul sesuai urutan masuk chat masing-masing.",
+           "Tangani sesuai urutan chat masuk agar adil bagi semua agen, tanpa perlu memberi kabar kepada yang menunggu."],
+          "Prioritaskan dampak (nominal besar dan pending lama), jaga hubungan (komplain yang tertunda), dan jangan biarkan siapa pun menunggu tanpa kabar. Urutan chat dan kecepatan bukan ukuran utama."),
+        mc("L6_2","Agen mengirim bukti transfer deposit, namun huruf nominalnya tampak tidak sejajar seperti diedit. Tindakan terbaik:",
+          "Cocokkan dengan mutasi rekening perusahaan sebelum menambah saldo, dan sampaikan bahwa proses menunggu verifikasi mutasi.",
+          ["Tambahkan saldo lebih dulu agar agen tidak kecewa dan tidak berhenti bertransaksi, lalu verifikasi mutasi menyusul kemudian.",
+           "Tolak deposit tersebut dan sampaikan kepada agen bahwa bukti transfer yang dikirim diduga kuat sudah dipalsukan.",
+           "Minta agen mengirim ulang bukti yang lebih jelas dan tambahkan saldo sementara sambil menunggu bukti tersebut masuk."],
+          "Keputusan saldo berdasarkan mutasi, bukan tampilan bukti. Tidak menuduh sebelum ada fakta, tetapi juga tidak menambah saldo sebelum terverifikasi."),
+        mc("L6_3","Anda baru sadar sudah memberi estimasi '1 jam' padahal prosedur yang benar 1x24 jam, dan agen kini menagih. Langkah terbaik:",
+          "Akui kekeliruan informasi, minta maaf, sampaikan estimasi yang benar, dan tawarkan pemantauan prioritas.",
+          ["Pertahankan jawaban awal agar CS terlihat konsisten dan agen tidak kehilangan kepercayaan pada informasi kami.",
+           "Sampaikan estimasi baru tanpa menyinggung informasi sebelumnya agar suasana percakapan tidak semakin memanas.",
+           "Jelaskan bahwa agen mungkin salah memahami maksud kami, lalu berikan estimasi yang benar tanpa perlu meminta maaf."],
+          "Kejujuran saat salah membangun kepercayaan jangka panjang. Mengelak atau menyalahkan pemahaman agen merusak kredibilitas lebih parah daripada mengakui kekeliruan."),
+        mc("L6_4","Seseorang mengaku pemilik akun agen dan meminta ganti nomor HP serta PIN lewat chat, tetapi tidak bisa membuktikan kepemilikan. Tindakan terbaik:",
+          "Tolak perubahan, jelaskan prosedur verifikasi resmi yang berlaku, dan arahkan agar proses dilakukan lewat jalur tersebut.",
+          ["Ubah nomor HP lebih dulu agar agen tidak terkunci, sedangkan PIN baru diubah setelah proses verifikasi selesai dilakukan.",
+           "Minta foto KTP lewat chat biasa lalu ubah data tanpa mencocokkannya dengan data pendaftaran yang tersimpan di sistem.",
+           "Teruskan permintaan ke atasan tanpa menjelaskan apa pun kepada yang bersangkutan sampai ada keputusan dari atasan."],
+          "Akun agen menyangkut saldo, sehingga pengambilalihan akun adalah risiko penipuan. Data hanya boleh diubah setelah verifikasi sesuai prosedur resmi. Bersikap tegas tetapi tetap memberi jalan keluar."),
+        mn("L6_5","Agen menulis: 'Saldo kepotong 500rb, pulsa Telkomsel belum masuk 45 menit, SN kosong. Dari kemarin saya komplain, kalian cuma bilang tunggu. Kalau nggak beres hari ini saya pindah!' Tulis balasan pertama Anda secara lengkap.",
+          "Mohon maaf, Kak, kami mengerti Kakak sudah menunggu sejak kemarin dan itu sangat mengecewakan. Boleh kirim ID transaksi dan nomor tujuannya? Kami cek ke provider sekarang dan kabari hasilnya paling lambat 30 menit lagi.",
+          "Unsur: empati atas komplain berulang, permintaan data (ID/nomor), tindakan konkret, tenggat terukur, tanpa janji pasti berhasil dan tanpa menanggapi ancaman dengan sinis.",
+          ["maaf","mengerti|memahami|kemarin","ID|SN|nomor","\\d+\\s*(menit|jam)|pukul|paling lambat|maksimal"],
+          ["silakan pindah","pasti masuk","jamin","\\b(aja|udah|nggak)\\b"]),
+        mn("L6_6","Shift Anda berakhir dan kasus agen di atas belum selesai. Tulis catatan serah terima (handover) singkat untuk CS shift berikutnya agar agen tidak perlu mengulang cerita.",
+          "Kasus agen Telkomsel Rp500.000, pending 45 menit, SN kosong, ID transaksi sudah dicatat. Sudah kami eskalasi ke tim teknis. Agen sudah dijanjikan kabar pukul 15.00 WIB dan dalam kondisi kesal karena komplain sejak kemarin.",
+          "Unsur: identitas kasus (ID/nominal/nomor), status terkini, tindakan yang sudah dilakukan, janji ke agen beserta tenggatnya, dan kondisi emosi agen.",
+          ["ID|SN|nomor|Rp|\\d{3}","pending|status|belum","sudah|telah|eskalasi","pukul|jam|kabar|janji|dijanjikan"],
+          [])
       ]
     };
 
-    const LEVEL_TIMERS = { 1:120, 2:150, 3:180, 4:210, 5:240, 6:300 };
+    const LEVEL_TIMERS = { 1:120, 2:150, 3:360, 4:420, 5:600, 6:720 };
 
     // ---------- Helper ----------
     const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -231,10 +451,11 @@
     }
 
     function showView(viewId) {
-      ["viewLogin", "viewMap", "viewQuiz", "viewResult", "viewTrainer"].forEach(id => {
+      ["viewLogin", "viewMap", "viewQuiz", "viewResult", "viewTrainer", "viewArena"].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.classList.add("hidden");
       });
+      if (viewId !== "viewArena") document.getElementById("arOverlay").classList.add("hidden");
       const target = document.getElementById(viewId);
       if (target) target.classList.remove("hidden");
     }
@@ -428,6 +649,15 @@
       document.getElementById("btnNextQuestion").classList.remove("hidden");
     }
 
+    function localScore(val, q) {
+      const t = val.toLowerCase();
+      const test = r => { try { return new RegExp(r, "i").test(t); } catch (e) { return false; } };
+      let s = (q.kw && q.kw.length) ? Math.round(q.kw.filter(test).length / q.kw.length * 100) : 40;
+      (q.no || []).forEach(r => { if (test(r)) s -= 25; });
+      if (t.length < 30) s -= 20;
+      return Math.max(0, Math.min(100, s));
+    }
+
     async function submitManualAnswer() {
       if (answered || finished) return;
       const val = document.getElementById("manualInput").value.trim();
@@ -441,11 +671,11 @@
       const q = LEVEL_QUESTIONS[currentLevel][currentQuestionIdx];
       let ev;
       try {
-        ev = await postJSON({ action: "evaluateWithAI", userText: val, question: q.q });
+        ev = await postJSON({ action: "evaluateWithAI", userText: val, question: q.q, rubrik: q.p + " Contoh jawaban ideal: " + q.k, kw: q.kw, no: q.no });
         if (typeof ev.percentage !== "number") throw new Error("format salah");
       } catch (err) {
-        const ok = /maaf/i.test(val) && /mohon|ditunggu/i.test(val) && val.length >= 30;
-        ev = { csat: ok ? "🙂" : "🙁", percentage: ok ? 80 : 40, feedback: "Server evaluasi tidak tersedia, dinilai otomatis." };
+        const pct = localScore(val, q);
+        ev = { csat: pct >= 75 ? "🙂" : "🙁", percentage: pct, feedback: "Server evaluasi tidak tersedia, dinilai otomatis berdasarkan unsur jawaban." };
       }
       if (finished) return; // waktu habis saat menunggu evaluasi
 
@@ -577,6 +807,7 @@
       const beat = () => fetch(`${CONFIG.APPS_SCRIPT_URL}?action=heartbeat&nama=${encodeURIComponent(currentUser.namaPanggung)}&namaLengkap=${encodeURIComponent(currentUser.namaLengkap)}&tim=${encodeURIComponent(currentUser.divisi)}`).catch(() => {});
       beat();
       heartbeatInterval = setInterval(beat, 10000);
+      if (currentUser.isTrainer) startBoardPoll(); else startRoomPoll();
     }
 
     function triggerHRAutoMatchmaking() {
@@ -594,6 +825,195 @@
           ).join("");
         })
         .catch(() => { box.innerHTML = `<p class="text-rose-500 font-semibold">Gagal terhubung ke server.</p>`; });
+    }
+
+    // ---------- ARENA DUEL ----------
+    let duel = null, duelPoll = null, duelTick = null, roomPoll = null, boardPoll = null, duelPendingRoom = null;
+    let clockOffset = 0, duelRoomId = null, lastPhase = "", lastBeep = -1, renderedMsgs = -1;
+    let duelSending = false, duelFinished = false, muted = false, audioCtx = null;
+    const $ = id => document.getElementById(id);
+    const nowMs = () => Date.now() + clockOffset;
+    const fmt = s => { s = Math.max(0, Math.ceil(s)); return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0"); };
+    const hitLabel = p => p >= 85 ? "💥 Serangan telak" : p >= 70 ? "⚔️ Kena" : p >= 50 ? "🛡️ Tertahan" : "💢 Meleset";
+
+    // fase pertandingan (sama dengan server): jeda 10 detik saat sisa 60 detik
+    function duelPhase(st, now) {
+      const e = (now - st.startAt) / 1000, pa = st.duration - 60;
+      if (e < 0) return { p: "wait", left: -e, pauseLeft: 0 };
+      if (e < pa) return { p: "fight", left: st.duration - e, pauseLeft: 0 };
+      if (e < pa + 10) return { p: "pause", left: 60, pauseLeft: pa + 10 - e };
+      const e2 = e - 10;
+      if (e2 < st.duration) return { p: "fight", left: st.duration - e2, pauseLeft: 0 };
+      return { p: "end", left: 0, pauseLeft: 0 };
+    }
+
+    // suara (WebAudio, tanpa file)
+    function unlockAudio() {
+      try { audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === "suspended") audioCtx.resume(); } catch (e) {}
+    }
+    document.addEventListener("pointerdown", unlockAudio);
+    function tone(freq, dur, vol, type, delay) {
+      if (muted || !audioCtx) return;
+      const t = audioCtx.currentTime + (delay || 0), o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      o.type = type || "sine"; o.frequency.value = freq;
+      g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      o.connect(g); g.connect(audioCtx.destination); o.start(t); o.stop(t + dur);
+    }
+    function bell(n) {
+      for (let i = 0; i < n; i++) [659, 1318, 1976, 2637].forEach((f, j) => tone(f, 1.8, [0.35, 0.2, 0.12, 0.06][j], "sine", i * 0.7));
+    }
+    function beep() { tone(880, 0.12, 0.2, "square", 0); }
+    function toggleMute() { muted = !muted; $("btnMute").innerText = muted ? "🔇" : "🔔"; }
+
+    // peserta: cek apakah sudah dapat lawan setelah Trainer menekan Spin
+    function startRoomPoll() {
+      clearInterval(roomPoll);
+      const check = async () => {
+        if (!currentUser || currentUser.isTrainer || duelRoomId) return;
+        try {
+          const r = await (await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getMyRoom&nama=${encodeURIComponent(currentUser.namaPanggung)}`)).json();
+          if (r.status !== "success" || sessionStorage.getItem("duel_done_" + r.roomId)) return;
+          if (!$("viewQuiz").classList.contains("hidden")) {
+            duelPendingRoom = r.roomId; $("duelBannerRoom").innerText = r.roomId; $("duelBanner").classList.remove("hidden");
+          } else enterArena(r.roomId);
+        } catch (e) {}
+      };
+      check();
+      roomPoll = setInterval(check, 4000);
+    }
+
+    function enterArena(roomId) {
+      unlockAudio();
+      duelRoomId = roomId; duel = null; lastPhase = ""; lastBeep = -1; renderedMsgs = -1; duelFinished = false; duelSending = false;
+      finished = true; clearInterval(timerInterval);
+      $("duelBanner").classList.add("hidden"); $("arChat").innerHTML = ""; $("arRoom").innerText = roomId;
+      showView("viewArena");
+      clearInterval(duelPoll); clearInterval(duelTick);
+      pollDuel();
+      duelPoll = setInterval(pollDuel, 2500);
+      duelTick = setInterval(tickDuel, 250);
+    }
+
+    async function pollDuel() {
+      if (!duelRoomId) return;
+      try {
+        const r = await (await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getDuel&room=${encodeURIComponent(duelRoomId)}&nama=${encodeURIComponent(currentUser.namaPanggung)}`)).json();
+        if (r.status !== "success") return;
+        clockOffset = r.serverNow - Date.now();
+        const first = !duel;
+        duel = r;
+        if (first) {
+          $("arCsName").innerText = r.cs; $("arAgenName").innerText = r.agen; $("arScenario").innerText = "Skenario: " + r.judul;
+          $("arBrief").innerHTML = r.role === "agen"
+            ? `<strong>🎭 Briefing Agen (rahasia):</strong> ${esc(r.briefing)}<br>Tulis keluhan lanjutan agar CS teruji!`
+            : `<strong>🛡️ Kamu CS.</strong> Agen akan complain. Balas dengan empati, tindakan, dan estimasi yang jelas. Tiap balasan dinilai!`;
+          $("arInput").placeholder = r.role === "agen" ? "Tulis keluhanmu sebagai agen..." : "Tulis balasan CS...";
+        }
+        renderDuel();
+      } catch (e) {}
+    }
+
+    function renderDuel() {
+      if (!duel) return;
+      $("arCsPts").innerText = duel.csPts; $("arAgenPts").innerText = duel.agenPts;
+      const tot = duel.csPts + duel.agenPts, share = tot ? Math.round(duel.csPts / tot * 100) : 50;
+      $("arBar").style.width = share + "%";
+      $("arDom").innerText = share >= 60 ? `🛡️ CS mendominasi (${share}%)` : share <= 40 ? `🔥 Agen mendominasi (${100 - share}%)` : `⚖️ Imbang (${share}% : ${100 - share}%)`;
+      const vis = duel.msgs.filter(m => m.ts <= nowMs());
+      if (vis.length === renderedMsgs) return;
+      renderedMsgs = vis.length;
+      const box = $("arChat");
+      box.innerHTML = vis.map(m => {
+        const cs = m.r === "cs";
+        const chip = !cs ? "" : m.x
+          ? `<div class="text-[9px] text-slate-300 mt-1">belum dinilai (menunggu agen bicara)</div>`
+          : `<div class="text-[10px] font-bold mt-1 ${m.p >= 70 ? 'text-emerald-300' : m.p >= 50 ? 'text-amber-300' : 'text-rose-300'}">${hitLabel(m.p)} • CS +${m.c} • Agen +${m.a}</div>`;
+        return `<div class="flex ${cs ? 'justify-end' : 'justify-start'}"><div class="max-w-[85%] px-3 py-2 rounded-xl text-xs ${cs ? 'bg-sky-700 text-white' : 'bg-red-800 text-red-50'}"><div class="text-[9px] opacity-70 font-bold">${cs ? '🛡️' : '🔥'} ${esc(m.n)}</div>${esc(m.t)}${chip}</div></div>`;
+      }).join("");
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function tickDuel() {
+      if (!duel || duelFinished) return;
+      const ph = duelPhase(duel, nowMs());
+      $("arPhase").innerText = { wait: "⏳ BERSIAP", fight: "⚔️ BERTARUNG", pause: "⏸️ JEDA", end: "🏁 SELESAI" }[ph.p];
+      $("arClock").innerText = fmt(ph.left);
+      $("arClock").className = "text-5xl font-black tabular-nums drop-shadow " +
+        (ph.p === "fight" && ph.left <= 10 ? "text-red-400 animate-pulse" : ph.p === "fight" && ph.left <= 60 ? "text-amber-300" : "text-white");
+      if (ph.p === "wait") { const s = Math.ceil(ph.left); if (s <= 3 && s !== lastBeep) { lastBeep = s; beep(); } }
+      if (ph.p !== lastPhase) {
+        if (ph.p === "fight") bell(2); else if (ph.p === "pause") bell(1); else if (ph.p === "end") bell(3);
+        lastPhase = ph.p;
+      }
+      const ov = $("arOverlay");
+      if (ph.p === "pause") {
+        ov.classList.remove("hidden");
+        ov.innerHTML = `<div class="text-center space-y-2"><div class="text-5xl">⏸️</div><div class="text-amber-300 font-black tracking-widest">JEDA PERTANDINGAN</div><div class="text-6xl font-black text-white tabular-nums">${Math.ceil(ph.pauseLeft)}</div><p class="text-xs text-amber-100 max-w-xs">Sisa 1 menit terakhir. Tarik napas, atur strategi, lalu bertarung lagi!</p></div>`;
+      } else if (ph.p !== "end") ov.classList.add("hidden");
+      const canType = ph.p === "fight";
+      $("arInput").disabled = !canType; $("arSend").disabled = !canType;
+      if (ph.p === "end") {
+        duelFinished = true; clearInterval(duelTick);
+        setTimeout(() => pollDuel().then(finishDuel), 1200);
+      }
+    }
+
+    async function sendDuelMsg() {
+      const inp = $("arInput"), text = inp.value.trim();
+      if (!duel || !text || duelSending || duelPhase(duel, nowMs()).p !== "fight") return;
+      duelSending = true; inp.value = ""; $("arSend").innerText = "...";
+      try { await postJSON({ action: "duelSend", room: duelRoomId, nama: currentUser.namaPanggung, text }); }
+      catch (e) { inp.value = text; }
+      duelSending = false; $("arSend").innerText = "Serang ⚔️";
+      pollDuel();
+    }
+
+    function finishDuel() {
+      clearInterval(duelPoll);
+      if (!duel) return;
+      const tot = duel.csPts + duel.agenPts, share = tot ? Math.round(duel.csPts / tot * 100) : 50;
+      const isCS = duel.role !== "agen";
+      const myScore = isCS ? share : 100 - share;
+      const won = isCS ? share >= 55 : share <= 45, draw = share > 45 && share < 55;
+      const xp = 50 + Math.round(myScore * 1.5) + (won ? 25 : 0);
+      const key = "duel_done_" + duelRoomId;
+      if (!sessionStorage.getItem(key)) {
+        sessionStorage.setItem(key, "1");
+        postJSON({ action: "saveResult", namaLengkap: currentUser.namaLengkap, namaPanggung: currentUser.namaPanggung,
+          divisi: currentUser.divisi, level: "DUEL-" + duelRoomId, xp, skorPct: myScore }).catch(() => {});
+      }
+      if (won) triggerConfetti();
+      const ov = $("arOverlay"); ov.classList.remove("hidden");
+      ov.innerHTML = `<div class="text-center space-y-2 max-w-xs">
+        <div class="text-6xl">${won ? "🏆" : draw ? "🤝" : "⚔️"}</div>
+        <div class="text-xl font-black text-amber-300">${won ? "KAMU MENANG!" : draw ? "PERTARUNGAN SERI" : "KAMU KALAH, TAPI BERTUMBUH"}</div>
+        <div class="text-xs text-amber-100">Dominasi: 🛡️ CS ${share}% vs 🔥 Agen ${100 - share}%<br>Poin duel: ${duel.csPts} vs ${duel.agenPts}</div>
+        <div class="text-sm font-bold text-white">Skor kamu ${myScore}% • +${xp} XP</div>
+        <div class="text-[10px] text-amber-200/80">Masuk otomatis ke nilai keseluruhan & klasemen.</div>
+        <button onclick="leaveArena()" class="w-full py-2.5 bg-amber-500 text-stone-950 font-black text-sm rounded-xl">Kembali ke Peta</button></div>`;
+    }
+
+    function leaveArena() {
+      clearInterval(duelPoll); clearInterval(duelTick);
+      duelRoomId = null; duel = null;
+      $("arOverlay").classList.add("hidden");
+      showView("viewMap"); renderLevelMap();
+    }
+
+    // trainer: pantau semua arena
+    function startBoardPoll() {
+      clearInterval(boardPoll);
+      const go = () => fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getDuelBoard`).then(r => r.json()).then(d => {
+        const box = $("duelBoard");
+        if (!d.rooms || !d.rooms.length) { box.innerHTML = ""; return; }
+        const label = { wait: "bersiap", fight: "bertarung", pause: "jeda", end: "selesai" };
+        box.innerHTML = `<h4 class="font-bold text-slate-700 pt-2">⚔️ Pantauan Arena</h4>` + d.rooms.map(r => {
+          const t = r.csPts + r.agenPts, sh = t ? Math.round(r.csPts / t * 100) : 50;
+          return `<div class="p-2 bg-slate-900 text-white rounded-lg"><div class="flex justify-between"><strong>${esc(r.roomId)}</strong><span>${label[r.phase]} ${fmt(r.left)}</span></div><div>🛡️ ${esc(r.cs)} <b>${r.csPts}</b> vs <b>${r.agenPts}</b> ${esc(r.agen)} 🔥</div><div class="h-1.5 rounded bg-red-600 mt-1 overflow-hidden"><div class="h-full bg-sky-500" style="width:${sh}%"></div></div></div>`;
+        }).join("");
+      }).catch(() => {});
+      go();
+      boardPoll = setInterval(go, 4000);
     }
 
     // ---------- Confetti ----------
