@@ -4,68 +4,37 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CS Excellent - PT Putra Jaya Telesindo</title>
-  
-  <!-- CDN Tailwind CSS & FontAwesome -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
-  <!-- Fallback Style Internal agar tampilan selalu rapi -->
   <style>
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-      background-color: #f1f5f9;
-      color: #0f172a;
-      margin: 0;
-      padding: 0;
-    }
-    .app-card {
-      background: #ffffff;
-      border-radius: 1rem;
-      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
-    }
-    .btn-primary {
-      background-color: #0284c7;
-      color: #ffffff;
-      font-weight: 600;
-      padding: 0.75rem 1.5rem;
-      border-radius: 0.75rem;
-      transition: all 0.2s;
-    }
-    .btn-primary:hover {
-      background-color: #0369a1;
-    }
+    body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; background-color: #f1f5f9; color: #0f172a; margin: 0; padding: 0; }
+    .hidden { display: none !important; }
   </style>
 </head>
 <body class="bg-slate-100 min-h-screen text-slate-800">
 
-  <!-- Canvas Confetti Standalone -->
   <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-50"></canvas>
 
   <div class="max-w-md mx-auto min-h-screen flex flex-col bg-white shadow-xl relative pb-10">
-    
-    <!-- HEADER BRANDING -->
+
     <header class="bg-gradient-to-r from-sky-600 to-blue-700 text-white p-5 text-center rounded-b-2xl shadow-md">
       <div class="w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl mx-auto flex items-center justify-center mb-2 shadow-inner">
         <i class="fa-solid fa-headset text-3xl text-white"></i>
       </div>
       <h1 class="text-2xl font-black tracking-tight">CS Excellent</h1>
       <p class="text-xs font-semibold text-sky-100 tracking-wide uppercase mt-0.5">PT Putra Jaya Telesindo</p>
-      <p class="text-xs text-sky-200 mt-2 italic">Arena Latihan Chat CS Server Pulsa & PPOB</p>
+      <p class="text-xs text-sky-200 mt-2 italic">Arena Latihan Chat CS Server Pulsa &amp; PPOB</p>
     </header>
 
-    <!-- CONTAINER UTAMA LOKASI TAMPILAN -->
     <main class="p-4 flex-1">
 
-      <!-- ================= 1. HALAMAN LOGIN ================= -->
+      <!-- 1. LOGIN -->
       <section id="viewLogin" class="space-y-4">
-        
-        <!-- Navigation Tab Roles -->
         <div class="flex bg-slate-100 p-1 rounded-xl font-medium text-sm">
           <button id="tabPeserta" onclick="switchLoginTab('peserta')" class="flex-1 py-2 text-center rounded-lg bg-white shadow-sm font-bold text-sky-700">Peserta</button>
           <button id="tabTrainer" onclick="switchLoginTab('trainer')" class="flex-1 py-2 text-center rounded-lg text-slate-500 hover:text-slate-800">Trainer HR</button>
         </div>
 
-        <!-- Form Login Peserta -->
         <form id="formPeserta" onsubmit="handleLoginPeserta(event)" class="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
           <div>
             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nama Lengkap</label>
@@ -74,7 +43,7 @@
           <div>
             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nama Panggung / Alias (Klasemen)</label>
             <input type="text" id="inputNamaPanggung" required placeholder="Contoh: Budi Pro / Ager" class="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-sky-500 outline-none">
-            <p class="text-[10px] text-slate-500 mt-1">*Nama panggung ini yang akan muncul di Papan Klasemen Real & Chat Duel.</p>
+            <p class="text-[10px] text-slate-500 mt-1">*Nama panggung ini yang akan muncul di Papan Klasemen Real &amp; Chat Duel.</p>
           </div>
           <div>
             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Divisi / Tim</label>
@@ -85,29 +54,25 @@
               <option value="Kenzie Komunika">Kenzie Komunika</option>
             </select>
           </div>
-
           <details class="text-xs text-slate-500">
             <summary class="cursor-pointer font-semibold text-sky-600">Opsi Duel Mandiri (Opsional)</summary>
             <div class="mt-2">
               <input type="text" id="inputRoomCode" placeholder="Kode Room (Contoh: ROOM1)" class="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-sky-500 outline-none">
             </div>
           </details>
-
           <button type="submit" class="w-full py-3 bg-sky-600 hover:bg-sky-700 text-white font-bold text-sm rounded-xl shadow-md transition">Mulai Arena Latihan</button>
         </form>
 
-        <!-- Form Login Trainer HR -->
         <form id="formTrainer" onsubmit="handleLoginTrainer(event)" class="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-200 hidden">
           <div>
             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">PIN Akses Trainer HR</label>
-            <input type="password" id="inputPinHR" required placeholder="PIN Default: 1234" class="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-sky-500 outline-none">
+            <input type="password" id="inputPinHR" required placeholder="Masukkan PIN" class="w-full px-3 py-2 text-sm border rounded-lg focus:ring-2 focus:ring-sky-500 outline-none">
           </div>
-          <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-xl shadow-md transition">Masuk Dashboard Trainer</button>
+          <button id="btnLoginTrainer" type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-xl shadow-md transition">Masuk Dashboard Trainer</button>
         </form>
-
       </section>
 
-      <!-- ================= 2. PETA LEVEL ================= -->
+      <!-- 2. PETA LEVEL -->
       <section id="viewMap" class="space-y-4 hidden">
         <div class="bg-sky-50 p-3 rounded-xl border border-sky-100 flex items-center justify-between">
           <div>
@@ -115,12 +80,543 @@
             <h3 id="mapUserAlias" class="font-bold text-slate-800 text-sm">Nama Panggung</h3>
             <p id="mapUserSub" class="text-xs text-slate-500">Nama Lengkap • Divisi</p>
           </div>
-          <button onclick="openLeaderboard()" class="px-3 py-1.5 bg-sky-600 text-white text-xs font-bold rounded-lg shadow-sm">🏆 Klasemen Real</button>
+          <div class="flex flex-col gap-1 items-end">
+            <button onclick="openLeaderboard()" class="px-3 py-1.5 bg-sky-600 text-white text-xs font-bold rounded-lg shadow-sm">🏆 Klasemen Real</button>
+            <button onclick="logout()" class="text-[10px] text-rose-600 font-bold">Keluar</button>
+          </div>
         </div>
-
         <div class="space-y-2">
-          <h2 class="text-sm font-bold text-slate-700 flex items-center gap-1.5">
-            <i class="fa-solid fa-map text-sky-600"></i> Peta Arena Latihan
-          </h2>
+          <h2 class="text-sm font-bold text-slate-700 flex items-center gap-1.5"><i class="fa-solid fa-map text-sky-600"></i> Peta Arena Latihan</h2>
           <p class="text-xs text-slate-500">Selesaikan setiap level minimal peringkat 🙂 (75%)</p>
         </div>
+        <div id="levelPathContainer" class="space-y-3"></div>
+      </section>
+
+      <!-- 3. KUIS -->
+      <section id="viewQuiz" class="space-y-4 hidden">
+        <div class="flex items-center justify-between bg-slate-100 p-3 rounded-xl">
+          <button onclick="confirmExitQuiz()" class="text-slate-500 hover:text-slate-800"><i class="fa-solid fa-arrow-left"></i></button>
+          <div>
+            <span id="quizLevelTitle" class="text-xs font-bold text-sky-700 uppercase block">LEVEL 1</span>
+            <span id="quizLevelSub" class="text-xs font-semibold text-slate-600">Penulisan Kata</span>
+          </div>
+          <div id="quizTimer" class="px-2.5 py-1 bg-amber-100 text-amber-800 font-bold text-xs rounded-lg flex items-center gap-1">
+            <i class="fa-solid fa-clock"></i> <span id="timerText">02:00</span>
+          </div>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center justify-between">
+            <span id="questionProgress" class="text-xs font-bold text-slate-400">Soal 1 dari 10</span>
+            <span id="questionTypeBadge" class="text-[10px] font-bold px-2 py-0.5 bg-sky-100 text-sky-700 rounded-md uppercase">Pilihan Ganda</span>
+          </div>
+          <p id="questionText" class="text-sm font-semibold text-slate-800 leading-relaxed">Pertanyaan soal akan muncul di sini...</p>
+          <div id="quizOptionsContainer" class="space-y-2"></div>
+          <div id="quizFeedback" class="p-3 rounded-xl hidden text-xs leading-relaxed"></div>
+        </div>
+        <button id="btnNextQuestion" onclick="nextQuestion()" class="w-full py-3 bg-sky-600 hover:bg-sky-700 text-white font-bold text-sm rounded-xl shadow-md hidden">Lanjut Soal Berikutnya</button>
+      </section>
+
+      <!-- 4. HASIL -->
+      <section id="viewResult" class="space-y-4 text-center hidden">
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+          <div id="resultEmoji" class="text-6xl animate-bounce">😍</div>
+          <h2 id="resultTitle" class="text-xl font-bold text-slate-800">Sangat Baik!</h2>
+          <p id="resultMsg" class="text-xs text-slate-500"></p>
+          <div class="py-3 bg-slate-50 rounded-xl flex justify-around text-center">
+            <div>
+              <span class="text-[10px] text-slate-400 font-bold block uppercase">Skor Persen</span>
+              <span id="resultScorePct" class="text-lg font-black text-sky-600">100%</span>
+            </div>
+            <div>
+              <span class="text-[10px] text-slate-400 font-bold block uppercase">XP Diperoleh</span>
+              <span id="resultXP" class="text-lg font-black text-amber-500">+100 XP</span>
+            </div>
+          </div>
+          <div class="pt-2 space-y-2">
+            <button id="btnResultNext" onclick="goToNextLevelOrMap()" class="w-full py-3 bg-sky-600 hover:bg-sky-700 text-white font-bold text-sm rounded-xl shadow-md">Lanjut ke Level Berikutnya</button>
+            <button onclick="retryCurrentLevel()" class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl">Ulangi Level Ini</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. DASHBOARD TRAINER -->
+      <section id="viewTrainer" class="space-y-4 hidden">
+        <div class="flex items-center justify-between">
+          <h2 class="text-base font-bold text-slate-800">Dashboard Trainer HR</h2>
+          <button onclick="logout()" class="text-xs text-rose-600 font-bold">Keluar</button>
+        </div>
+        <div class="bg-indigo-900 text-white p-4 rounded-xl space-y-3 shadow-md">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-indigo-200">Kontrol Pelatihan Duel</h3>
+          <p class="text-xs text-indigo-100">Jodohkan seluruh peserta yang online secara acak ke dalam Arena Role Play.</p>
+          <button onclick="triggerHRAutoMatchmaking()" class="w-full py-2.5 bg-amber-400 hover:bg-amber-500 text-indigo-950 font-black text-xs uppercase tracking-wide rounded-lg shadow">
+            🎡 Spin &amp; Tandingkan Semua Peserta
+          </button>
+        </div>
+        <div id="matchResult" class="text-xs space-y-1"></div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- MODAL KLASEMEN -->
+  <div id="modalLeaderboard" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 flex items-center justify-center p-4 hidden">
+    <div class="bg-white w-full max-w-sm rounded-2xl p-4 space-y-3 max-h-[80vh] flex flex-col">
+      <div class="flex items-center justify-between border-b pb-2">
+        <h3 class="font-bold text-sm text-slate-800">🏆 Klasemen Real-Time</h3>
+        <button onclick="closeLeaderboard()" class="text-slate-400 text-lg"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div id="leaderboardList" class="flex-1 overflow-y-auto space-y-2 text-xs"></div>
+    </div>
+  </div>
+
+  <script>
+    const CONFIG = {
+      APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbweYtU07PiB08hEI3ZaJrOXEiN6CfnbG88FfJ57y-YqhEavVMpQjmG0LLzSYhyC3qd7/exec"
+    };
+
+    let currentUser = null;
+    let currentLevel = 1;
+    let currentQuestionIdx = 0;
+    let currentScore = 0;
+    let timerInterval = null;
+    let heartbeatInterval = null;
+    let answered = false;   // kunci agar satu soal hanya dihitung sekali
+    let finished = false;   // kunci agar level hanya diselesaikan sekali
+
+    const LEVEL_QUESTIONS = {
+      1: [
+        { id:"L1_1", tipe:"pilihan_ganda", q:"Manakah penulisan kata depan/tempat yang paling tepat?", ops:["di mana","dimana","di-mana","dimana-mana"], k:"di mana", p:"Kata depan 'di' penunjuk tempat wajib ditulis terpisah." },
+        { id:"L1_2", tipe:"pilihan_ganda", q:"Pilihlah bentuk penulisan kata yang baku dan tepat:", ops:["ke mana","kemana","ke-mana","kemana-mana"], k:"ke mana", p:"Kata depan 'ke' penunjuk tujuan ditulis terpisah." },
+        { id:"L1_3", tipe:"pilihan_ganda", q:"Manakah penulisan kata imbuhan yang benar?", ops:["diproses","di proses","di-proses","diproseskan"], k:"diproses", p:"Awalan 'di-' sebagai kata kerja pasif ditulis serangkai." },
+        { id:"L1_4", tipe:"pilihan_ganda", q:"Penulisan kata ungkapan santun CS yang benar adalah:", ops:["terima kasih","terimakasih","terima-kasih","terimakasihnya"], k:"terima kasih", p:"Ungkapan 'terima kasih' ditulis terpisah dua kata." },
+        { id:"L1_5", tipe:"pilihan_ganda", q:"Penulisan keterangan waktu baku Indonesia adalah:", ops:["pukul 10.00 WIB","jam 10:00 wib","pukul 10:00 wib","jam 10.00 WIB"], k:"pukul 10.00 WIB", p:"Format baku menggunakan 'pukul', tanda titik (.) untuk jam, dan WIB kapital." },
+        { id:"L1_6", tipe:"pilihan_ganda", q:"Manakah penulisan gabungan kata berimbuhan yang benar?", ops:["ketidaknyamanan","ketidak nyamanan","ke tidak nyamanan","ketidak-nyamanan"], k:"ketidaknyamanan", p:"Mendapat apitan 'ke-an', maka seluruh gabungan kata ditulis serangkai." },
+        { id:"L1_7", tipe:"pilihan_ganda", q:"Penulisan lokasi penanganan kendala yang tepat:", ops:["di sini","disini","di-sini","disiniaja"], k:"di sini", p:"Kata 'di sini' merujuk tempat, sehingga wajib terpisah." }
+      ],
+      2: [
+        { id:"L2_1", tipe:"pilihan_ganda", q:"Pilihlah bentuk kata baku KBBI:", ops:["izin","ijin","idjin","isjin"], k:"izin", p:"Bentuk baku adalah 'izin'." },
+        { id:"L2_2", tipe:"pilihan_ganda", q:"Kata baku untuk kegiatan operasional CS adalah:", ops:["praktik","praktek","praksis","praktis"], k:"praktik", p:"Bentuk baku menurut KBBI adalah 'praktik'." },
+        { id:"L2_3", tipe:"pilihan_ganda", q:"Pilihlah penulisan nomor rekening yang baku:", ops:["nomor","nomer","no.","numor"], k:"nomor", p:"Bentuk baku KBBI adalah 'nomor'." },
+        { id:"L2_4", tipe:"pilihan_ganda", q:"Kata baku untuk risiko kegagalan transaksi:", ops:["risiko","resiko","reseko","risiko-nya"], k:"risiko", p:"Bentuk baku adalah 'risiko'." },
+        { id:"L2_5", tipe:"pilihan_ganda", q:"Kata ajakan santun baku kepada agen:", ops:["silakan","silahkan","disilahkan","disilakan"], k:"silakan", p:"Bentuk baku tanpa huruf 'h' yaitu 'silakan'." }
+      ],
+      3: [
+        { id:"L3_1", tipe:"pilihan_ganda", q:"Manakah diksi sapaan CS yang paling ramah dan sopan?", ops:["Mohon ditunggu sebentar ya, Kak. Kami bantu cek transaksi pulsa Kakak.","Tunggu ya","Sebentar lagi dicek","Nanti diinfokan"], k:"Mohon ditunggu sebentar ya, Kak. Kami bantu cek transaksi pulsa Kakak.", p:"Gunakan sapaan hangat dan kepastian tindakan." },
+        { id:"L3_2", tipe:"pilihan_ganda", q:"Hindari kalimat terlarang yang menyalahkan agen. Pilih respons terbaik:", ops:["Sepertinya ada penyesuaian pada nomor tujuan, Kak. Boleh dibantu cek kembali?","Itu salah Kakak sendiri","Kakak keliru masukkan nomor","Prosedurnya begitu"], k:"Sepertinya ada penyesuaian pada nomor tujuan, Kak. Boleh dibantu cek kembali?", p:"Jangan pernah menyalahkan agen secara langsung." }
+      ],
+      4: [
+        { id:"L4_1", tipe:"pilihan_ganda", q:"Pilih kalimat yang paling tegas dan bebas dari makna ganda (ambigu):", ops:["Khusus hari ini, transaksi tidak dapat diproses.","Transaksi tidak bisa diproses hari ini.","Hari ini transaksi belum diproses."], k:"Khusus hari ini, transaksi tidak dapat diproses.", p:"Hindari kalimat yang bisa ditafsirkan sebagai gangguan permanen." }
+      ],
+      5: [
+        { id:"L5_1", tipe:"ketik_manual", q:"Perbaiki kalimat buruk berikut agar lebih santun & efektif: 'Udah dibilang pending, tunggu aja nanti juga masuk sendiri!'", k:"Mohon maaf atas ketidaknyamanannya, Kak. Transaksi saat ini sedang diproses. Mohon ditunggu paling lambat 1x24 jam ya, Kak.", p:"Sebutkan permintaan maaf, bahasa santun, dan estimasi konkret." }
+      ],
+      6: [
+        { id:"L6_1", tipe:"pilihan_ganda", q:"Skenario: Saldo agen terpotong tetapi pulsa belum masuk & transaksi pending. Urutkan penanganan terbaik:", ops:["Sapa & Maaf -> Minta Data ID & SN -> Beri Estimasi Waktu -> Solusi & Penutup","Langsung suruh tunggu -> Penutup"], k:"Sapa & Maaf -> Minta Data ID & SN -> Beri Estimasi Waktu -> Solusi & Penutup", p:"Alur CS standar: Empati, Verifikasi, Solusi, Penutup." }
+      ]
+    };
+
+    const LEVEL_TIMERS = { 1:120, 2:150, 3:180, 4:210, 5:240, 6:300 };
+
+    // ---------- Helper ----------
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const passKey = l => `level_passed_${currentUser.namaLengkap}_${currentUser.namaPanggung}_${l}`;
+
+    async function postJSON(payload) {
+      const res = await fetch(CONFIG.APPS_SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" }, // simple request, tanpa preflight CORS
+        body: JSON.stringify(payload)
+      });
+      return res.json();
+    }
+
+    function showView(viewId) {
+      ["viewLogin", "viewMap", "viewQuiz", "viewResult", "viewTrainer"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add("hidden");
+      });
+      const target = document.getElementById(viewId);
+      if (target) target.classList.remove("hidden");
+    }
+
+    function fillIdentity() {
+      document.getElementById("mapUserAlias").innerText = currentUser.namaPanggung;
+      document.getElementById("mapUserSub").innerText = `${currentUser.namaLengkap} • ${currentUser.divisi}`;
+    }
+
+    // ---------- Init ----------
+    window.onload = function () {
+      let saved = null;
+      try { saved = JSON.parse(sessionStorage.getItem("cs_user")); } catch (e) {}
+      if (saved) {
+        currentUser = saved;
+        if (currentUser.isTrainer) {
+          showView("viewTrainer");
+        } else {
+          fillIdentity();
+          showView("viewMap");
+          renderLevelMap();
+        }
+        startHeartbeat();
+      }
+    };
+
+    // ---------- Login ----------
+    function switchLoginTab(role) {
+      const formP = document.getElementById("formPeserta");
+      const formT = document.getElementById("formTrainer");
+      const tabP = document.getElementById("tabPeserta");
+      const tabT = document.getElementById("tabTrainer");
+      if (role === 'peserta') {
+        formP.classList.remove("hidden"); formT.classList.add("hidden");
+        tabP.className = "flex-1 py-2 text-center rounded-lg bg-white shadow-sm font-bold text-sky-700";
+        tabT.className = "flex-1 py-2 text-center rounded-lg text-slate-500 hover:text-slate-800";
+      } else {
+        formP.classList.add("hidden"); formT.classList.remove("hidden");
+        tabT.className = "flex-1 py-2 text-center rounded-lg bg-white shadow-sm font-bold text-indigo-700";
+        tabP.className = "flex-1 py-2 text-center rounded-lg text-slate-500 hover:text-slate-800";
+      }
+    }
+
+    function handleLoginPeserta(e) {
+      e.preventDefault();
+      const namaLengkap = document.getElementById("inputNamaLengkap").value.trim();
+      const namaPanggung = document.getElementById("inputNamaPanggung").value.trim();
+      const divisi = document.getElementById("selectDivisi").value;
+      if (!namaLengkap || !namaPanggung || !divisi) return alert("Mohon lengkapi seluruh data!");
+
+      currentUser = { namaLengkap, namaPanggung, divisi, isTrainer: false };
+      sessionStorage.setItem("cs_user", JSON.stringify(currentUser));
+      fillIdentity();
+      showView("viewMap");
+      renderLevelMap();
+      startHeartbeat();
+    }
+
+    async function handleLoginTrainer(e) {
+      e.preventDefault();
+      const pin = document.getElementById("inputPinHR").value.trim();
+      const btn = document.getElementById("btnLoginTrainer");
+      btn.disabled = true; btn.innerText = "Memeriksa...";
+      try {
+        const r = await postJSON({ action: "verifyPin", pin });
+        if (r.status === "success") {
+          currentUser = { namaLengkap: "Trainer HR", namaPanggung: "HRD Master", divisi: "HRD", isTrainer: true };
+          sessionStorage.setItem("cs_user", JSON.stringify(currentUser));
+          showView("viewTrainer");
+          startHeartbeat();
+        } else {
+          alert("PIN Trainer HR salah!");
+        }
+      } catch (err) {
+        alert("Gagal terhubung ke server. Coba lagi.");
+      }
+      btn.disabled = false; btn.innerText = "Masuk Dashboard Trainer";
+    }
+
+    function logout() {
+      sessionStorage.clear();
+      clearInterval(heartbeatInterval);
+      clearInterval(timerInterval);
+      location.reload();
+    }
+
+    // ---------- Peta level ----------
+    function getLevelName(l) {
+      const names = { 1:"Penulisan Kata", 2:"Kata Baku & Tidak Baku", 3:"Diksi Tepat CS", 4:"Kalimat Efektif", 5:"Perbaiki Kalimat", 6:"Situasi Nyata PPOB" };
+      return names[l] || "";
+    }
+
+    function renderLevelMap() {
+      const container = document.getElementById("levelPathContainer");
+      container.innerHTML = "";
+      for (let l = 1; l <= 6; l++) {
+        const isUnlocked = l === 1 || localStorage.getItem(passKey(l - 1));
+        const card = document.createElement("div");
+        card.className = `p-4 rounded-xl border flex items-center justify-between transition ${isUnlocked ? 'bg-white border-slate-200 shadow-sm' : 'bg-slate-100 border-slate-200 opacity-60'}`;
+        card.innerHTML = `
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl ${isUnlocked ? 'bg-sky-100 text-sky-700' : 'bg-slate-200 text-slate-400'} flex items-center justify-center font-black text-sm">${l}</div>
+            <div>
+              <h4 class="font-bold text-xs text-slate-800">Level ${l}</h4>
+              <p class="text-[10px] text-slate-500">${getLevelName(l)}</p>
+            </div>
+          </div>
+          ${isUnlocked ? `<button onclick="startLevel(${l})" class="px-3 py-1.5 bg-sky-600 text-white font-bold text-xs rounded-lg shadow-sm">Mulai</button>` : `<i class="fa-solid fa-lock text-slate-400 text-sm"></i>`}
+        `;
+        container.appendChild(card);
+      }
+    }
+
+    // ---------- Kuis ----------
+    function startLevel(lvl) {
+      currentLevel = lvl;
+      currentQuestionIdx = 0;
+      currentScore = 0;
+      finished = false;
+
+      document.getElementById("quizLevelTitle").innerText = `LEVEL ${lvl}`;
+      document.getElementById("quizLevelSub").innerText = getLevelName(lvl);
+
+      showView("viewQuiz");
+      startTimer(LEVEL_TIMERS[lvl] || 180);
+      renderQuestion();
+    }
+
+    function startTimer(seconds) {
+      clearInterval(timerInterval);
+      let remaining = seconds;
+      updateTimerDisplay(remaining);
+      timerInterval = setInterval(() => {
+        remaining--;
+        updateTimerDisplay(Math.max(remaining, 0));
+        if (remaining <= 0) finishLevel();
+      }, 1000);
+    }
+
+    function updateTimerDisplay(sec) {
+      const m = Math.floor(sec / 60).toString().padStart(2, '0');
+      const s = (sec % 60).toString().padStart(2, '0');
+      document.getElementById("timerText").innerText = `${m}:${s}`;
+    }
+
+    function renderQuestion() {
+      answered = false;
+      const questions = LEVEL_QUESTIONS[currentLevel];
+      const q = questions[currentQuestionIdx];
+
+      document.getElementById("questionProgress").innerText = `Soal ${currentQuestionIdx + 1} dari ${questions.length}`;
+      document.getElementById("questionText").innerText = q.q;
+      document.getElementById("questionTypeBadge").innerText = q.tipe === "ketik_manual" ? "Ketik Jawaban" : "Pilihan Ganda";
+      document.getElementById("btnNextQuestion").classList.add("hidden");
+      document.getElementById("quizFeedback").classList.add("hidden");
+
+      const container = document.getElementById("quizOptionsContainer");
+      container.innerHTML = "";
+
+      if (q.tipe === "ketik_manual") {
+        container.innerHTML = `
+          <textarea id="manualInput" rows="3" placeholder="Ketik perbaikan kalimat CS di sini..." class="w-full p-3 text-xs border rounded-xl focus:ring-2 focus:ring-sky-500 outline-none"></textarea>
+          <button id="btnSubmitManual" onclick="submitManualAnswer()" class="w-full py-2.5 bg-sky-600 text-white font-bold text-xs rounded-xl">Kirim Jawaban</button>
+        `;
+      } else {
+        [...q.ops].sort(() => Math.random() - 0.5).forEach(op => {   // opsi diacak
+          const btn = document.createElement("button");
+          btn.className = "opt-btn w-full p-3 text-left text-xs font-semibold bg-slate-50 hover:bg-sky-50 border border-slate-200 hover:border-sky-300 rounded-xl transition";
+          btn.innerText = op;
+          btn.onclick = () => checkAnswer(op, q.k, q.p);
+          container.appendChild(btn);
+        });
+      }
+    }
+
+    function checkAnswer(selected, correct, explanation) {
+      if (answered || finished) return;
+      answered = true;
+      const isCorrect = selected === correct;
+      if (isCorrect) currentScore++;
+
+      document.querySelectorAll(".opt-btn").forEach(b => {
+        b.disabled = true;
+        if (b.innerText === correct) b.classList.add("bg-emerald-100", "border-emerald-400");
+        else if (b.innerText === selected) b.classList.add("bg-rose-100", "border-rose-400");
+      });
+
+      const fb = document.getElementById("quizFeedback");
+      fb.className = `p-3 rounded-xl text-xs leading-relaxed ${isCorrect ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'}`;
+      fb.innerHTML = `<strong>${isCorrect ? 'Benar!' : 'Kurang Tepat!'}</strong> ${esc(explanation)}`;
+      document.getElementById("btnNextQuestion").classList.remove("hidden");
+    }
+
+    async function submitManualAnswer() {
+      if (answered || finished) return;
+      const val = document.getElementById("manualInput").value.trim();
+      if (!val) return alert("Ketik jawaban Anda terlebih dahulu!");
+      answered = true;
+
+      const btn = document.getElementById("btnSubmitManual");
+      btn.disabled = true; btn.innerText = "Mengevaluasi...";
+      document.getElementById("manualInput").disabled = true;
+
+      const q = LEVEL_QUESTIONS[currentLevel][currentQuestionIdx];
+      let ev;
+      try {
+        ev = await postJSON({ action: "evaluateWithAI", userText: val, question: q.q });
+        if (typeof ev.percentage !== "number") throw new Error("format salah");
+      } catch (err) {
+        const ok = /maaf/i.test(val) && /mohon|ditunggu/i.test(val) && val.length >= 30;
+        ev = { csat: ok ? "🙂" : "🙁", percentage: ok ? 80 : 40, feedback: "Server evaluasi tidak tersedia, dinilai otomatis." };
+      }
+      if (finished) return; // waktu habis saat menunggu evaluasi
+
+      const ok = ev.percentage >= 75;
+      if (ok) currentScore++;
+      btn.innerText = "Terkirim";
+
+      const fb = document.getElementById("quizFeedback");
+      fb.className = `p-3 rounded-xl text-xs leading-relaxed ${ok ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'}`;
+      fb.innerHTML = `<strong>${esc(ev.csat)} ${esc(ev.percentage)}%</strong> ${esc(ev.feedback)}<br><em class="block mt-1">Contoh jawaban: ${esc(q.k)}</em>`;
+      document.getElementById("btnNextQuestion").classList.remove("hidden");
+    }
+
+    function nextQuestion() {
+      if (finished) return;
+      currentQuestionIdx++;
+      if (currentQuestionIdx < LEVEL_QUESTIONS[currentLevel].length) renderQuestion();
+      else finishLevel();
+    }
+
+    function finishLevel() {
+      if (finished) return;
+      finished = true;
+      clearInterval(timerInterval);
+
+      const total = LEVEL_QUESTIONS[currentLevel].length;
+      const pct = Math.min(100, Math.round((currentScore / total) * 100));
+      const xp = pct * 2;
+      const passed = pct >= 75;
+
+      let emoji = "😍", title = "Sangat Baik!";
+      if (pct < 40) { emoji = "😡"; title = "Perlu Belajar Lagi"; }
+      else if (pct < 60) { emoji = "🙁"; title = "Kurang"; }
+      else if (pct < 75) { emoji = "😐"; title = "Sedang"; }
+      else if (pct < 90) { emoji = "🙂"; title = "Baik"; }
+
+      if (passed) {
+        localStorage.setItem(passKey(currentLevel), "true");
+        triggerConfetti();
+      }
+
+      document.getElementById("resultEmoji").innerText = emoji;
+      document.getElementById("resultTitle").innerText = title;
+      document.getElementById("resultScorePct").innerText = `${pct}%`;
+      document.getElementById("resultXP").innerText = `+${xp} XP`;
+      document.getElementById("resultMsg").innerText = passed
+        ? (currentLevel < 6 ? "Level lulus! Level berikutnya sudah terbuka." : "Selamat, semua level sudah kamu selesaikan!")
+        : "Belum lulus. Capai minimal 75% untuk membuka level berikutnya.";
+      document.getElementById("btnResultNext").innerText = (passed && currentLevel < 6) ? "Lanjut ke Level Berikutnya" : "Kembali ke Peta";
+
+      postJSON({
+        action: "saveResult",
+        namaLengkap: currentUser.namaLengkap,
+        namaPanggung: currentUser.namaPanggung,
+        divisi: currentUser.divisi,
+        level: currentLevel,
+        xp: xp,
+        skorPct: pct
+      }).catch(() => {});
+
+      showView("viewResult");
+    }
+
+    function goToNextLevelOrMap() {
+      if (currentLevel < 6 && localStorage.getItem(passKey(currentLevel))) {
+        startLevel(currentLevel + 1);
+      } else {
+        showView("viewMap");
+        renderLevelMap();
+      }
+    }
+
+    function retryCurrentLevel() { startLevel(currentLevel); }
+
+    function confirmExitQuiz() {
+      if (confirm("Yakin ingin keluar dari latihan ini? Progres tidak tersimpan.")) {
+        finished = true;
+        clearInterval(timerInterval);
+        showView("viewMap");
+        renderLevelMap();
+      }
+    }
+
+    // ---------- Klasemen ----------
+    function openLeaderboard() {
+      document.getElementById("modalLeaderboard").classList.remove("hidden");
+      const list = document.getElementById("leaderboardList");
+      list.innerHTML = `<p class="text-center text-slate-400 py-4">Memuat data klasemen real...</p>`;
+
+      fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getLeaderboard`)
+        .then(res => res.json())
+        .then(data => {
+          list.innerHTML = "";
+          if (!Array.isArray(data) || data.length === 0) {
+            list.innerHTML = `<p class="text-center text-slate-400 py-4">Belum ada data klasemen.</p>`;
+            return;
+          }
+          data.forEach((item, idx) => {
+            const row = document.createElement("div");
+            row.className = "flex items-center justify-between p-2 bg-slate-50 rounded-lg text-xs";
+            row.innerHTML = `
+              <div class="flex items-center gap-2">
+                <span class="font-black text-slate-400 w-4">${idx + 1}</span>
+                <div>
+                  <strong class="text-slate-800 block">${esc(item.namaPanggung)}</strong>
+                  <span class="text-[10px] text-slate-500">${esc(item.namaLengkap)} • ${esc(item.divisi)}</span>
+                </div>
+              </div>
+              <div class="text-right">
+                <span class="font-bold text-sky-600 block">${esc(item.totalXP)} XP</span>
+                <span class="text-[10px] text-emerald-600 font-bold">${esc(item.skorPct)}% CSAT</span>
+              </div>`;
+            list.appendChild(row);
+          });
+        })
+        .catch(() => {
+          list.innerHTML = `<p class="text-center text-rose-500 py-4">Gagal memuat klasemen.</p>`;
+        });
+    }
+
+    function closeLeaderboard() {
+      document.getElementById("modalLeaderboard").classList.add("hidden");
+    }
+
+    // ---------- Heartbeat & Matchmaking ----------
+    function startHeartbeat() {
+      if (!currentUser) return;
+      clearInterval(heartbeatInterval);
+      const beat = () => fetch(`${CONFIG.APPS_SCRIPT_URL}?action=heartbeat&nama=${encodeURIComponent(currentUser.namaPanggung)}&namaLengkap=${encodeURIComponent(currentUser.namaLengkap)}&tim=${encodeURIComponent(currentUser.divisi)}`).catch(() => {});
+      beat();
+      heartbeatInterval = setInterval(beat, 10000);
+    }
+
+    function triggerHRAutoMatchmaking() {
+      const box = document.getElementById("matchResult");
+      box.innerHTML = `<p class="text-slate-500">Memproses...</p>`;
+      fetch(`${CONFIG.APPS_SCRIPT_URL}?action=autoMatchmake`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.status !== "success" || !data.rooms.length) {
+            box.innerHTML = `<p class="text-amber-600 font-semibold">Belum ada peserta online.</p>`;
+            return;
+          }
+          box.innerHTML = data.rooms.map(r =>
+            `<div class="p-2 bg-slate-50 border rounded-lg"><strong>${esc(r.roomId)}</strong>: ${esc(r.playerCS)} (CS) vs ${esc(r.playerAgen)} (Agen)</div>`
+          ).join("");
+        })
+        .catch(() => { box.innerHTML = `<p class="text-rose-500 font-semibold">Gagal terhubung ke server.</p>`; });
+    }
+
+    // ---------- Confetti ----------
+    function triggerConfetti() {
+      const canvas = document.getElementById("confettiCanvas");
+      const ctx = canvas.getContext("2d");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const pieces = Array.from({ length: 80 }).map(() => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height - canvas.height,
+        color: ['#0284c7', '#38bdf8', '#f59e0b', '#10b981', '#ec4899'][Math.floor(Math.random() * 5)],
+        size: Math.random() * 8 + 4,
+        speed: Math.random() * 3 + 2
+      }));
+      let frame = 0;
+      (function loop() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        pieces.forEach(p => { p.y += p.speed; ctx.fillStyle = p.color; ctx.fillRect(p.x, p.y, p.size, p.size); });
+        if (++frame < 120) requestAnimationFrame(loop);
+        else ctx.clearRect(0, 0, canvas.width, canvas.height);
+      })();
+    }
+  </script>
+</body>
+</html>
