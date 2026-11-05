@@ -15,7 +15,7 @@
 
   <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-50"></canvas>
 
-  <div class="max-w-md mx-auto min-h-screen flex flex-col bg-white shadow-xl relative pb-10">
+  <div id="appShell" class="max-w-md mx-auto min-h-screen flex flex-col bg-white shadow-xl relative pb-10">
 
     <header class="bg-gradient-to-r from-sky-600 to-blue-700 text-white p-5 text-center rounded-b-2xl shadow-md">
       <div class="w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl mx-auto flex items-center justify-center mb-2 shadow-inner">
@@ -155,6 +155,24 @@
         <div id="onlinePanel" class="text-xs bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-1"></div>
         <div id="matchResult" class="text-xs space-y-1"></div>
         <div id="duelBoard" class="text-xs space-y-1"></div>
+        <div class="bg-white border border-slate-200 rounded-xl p-3 space-y-2">
+          <div class="flex items-center justify-between gap-2">
+            <h3 class="text-sm font-bold text-slate-800">📊 Klasemen &amp; Nilai Peserta</h3>
+            <div class="flex gap-2">
+              <button onclick="exportHRCsv()" class="px-2 py-1 text-[11px] font-bold bg-emerald-600 text-white rounded-lg">⬇️ CSV</button>
+              <button onclick="loadHRDashboard()" class="px-2 py-1 text-[11px] font-bold bg-sky-600 text-white rounded-lg">↻ Muat ulang</button>
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <input id="hrSearch" oninput="renderHRDashboard()" placeholder="Cari nama / alias..." class="flex-1 px-3 py-1.5 text-xs border rounded-lg outline-none focus:ring-2 focus:ring-sky-500">
+            <select id="hrDivisi" onchange="renderHRDashboard()" class="px-2 py-1.5 text-xs border rounded-lg bg-white">
+              <option value="">Semua divisi</option><option>Administrasi</option><option>Radar Pulsa</option><option>Kenzie Komunika</option>
+            </select>
+          </div>
+          <div id="hrSummary"></div>
+          <div id="hrTable" class="overflow-x-auto"></div>
+          <p class="text-[10px] text-slate-400">Lulus = nilai terbaik level ≥ 70%. Klik baris peserta untuk melihat detail. Data diperbarui otomatis tiap 60 detik.</p>
+        </div>
       </section>
 
       <!-- 6. ARENA DUEL -->
@@ -460,6 +478,8 @@
         if (el) el.classList.add("hidden");
       });
       if (viewId !== "viewArena") document.getElementById("arOverlay").classList.add("hidden");
+      const shell = document.getElementById("appShell");
+      shell.classList.toggle("max-w-3xl", viewId === "viewTrainer"); shell.classList.toggle("max-w-md", viewId !== "viewTrainer");
       const target = document.getElementById(viewId);
       if (target) target.classList.remove("hidden");
     }
@@ -527,6 +547,7 @@
         const r = await postJSON({ action: "verifyPin", pin });
         if (r.status === "success") {
           currentUser = { namaLengkap: "Trainer HR", namaPanggung: "HRD Master", divisi: "HRD", isTrainer: true };
+          sessionStorage.setItem("cs_pin", pin);
           sessionStorage.setItem("cs_user", JSON.stringify(currentUser));
           showView("viewTrainer");
           startHeartbeat();
@@ -822,7 +843,7 @@
       sendBeat();
       heartbeatInterval = setInterval(sendBeat, 10000);
       keepAwake();
-      if (currentUser.isTrainer) { startBoardPoll(); startOnlinePoll(); } else startRoomPoll();
+      if (currentUser.isTrainer) { startBoardPoll(); startOnlinePoll(); loadHRDashboard(); } else startRoomPoll();
     }
 
     function triggerHRAutoMatchmaking() {
@@ -1115,6 +1136,66 @@
       }).catch(() => { $("onlinePanel").innerHTML = `<div class="text-rose-500">Gagal menghubungi server. Cek URL Apps Script dan deployment.</div>`; $("onlinePanel").dataset.k = ""; });
       go();
       onlinePoll = setInterval(go, 5000);
+    }
+
+    // --- Dashboard HR: klasemen & detail nilai semua peserta ---
+    let hrData = null, hrOpen = {}, hrPoll = null;
+    const fdate = t => t ? new Date(t).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" }) : "-";
+
+    async function loadHRDashboard(auto) {
+      let pin = sessionStorage.getItem("cs_pin");
+      if (!pin) pin = prompt("Masukkan PIN Trainer untuk membuka nilai peserta") || "";
+      if (!auto) $("hrTable").innerHTML = `<p class="text-slate-400 py-3 text-center">Memuat data nilai...</p>`;
+      try {
+        const d = await postJSON({ action: "getHRDashboard", pin });
+        if (d.status === "denied") { sessionStorage.removeItem("cs_pin"); $("hrTable").innerHTML = `<p class="text-rose-500 py-3 text-center">PIN salah atau sesi berakhir. Klik "Muat ulang" lalu masukkan PIN.</p>`; return; }
+        if (d.status !== "success") throw new Error(d.message || "gagal");
+        sessionStorage.setItem("cs_pin", pin);
+        d.participants.forEach((p, i) => p._i = i);
+        hrData = d; renderHRDashboard();
+      } catch (e) { $("hrTable").innerHTML = `<p class="text-rose-500 py-3 text-center">Gagal memuat dashboard: ${esc(e.message)}</p>`; }
+      clearInterval(hrPoll); hrPoll = setInterval(() => loadHRDashboard(true), 60000);
+    }
+
+    function toggleHR(i) { hrOpen[i] = !hrOpen[i]; renderHRDashboard(); }
+
+    function renderHRDashboard() {
+      if (!hrData) return;
+      const q = $("hrSearch").value.trim().toLowerCase(), dv = $("hrDivisi").value;
+      const list = hrData.participants.filter(p => (!dv || p.divisi === dv) && (!q || (p.namaLengkap + " " + p.namaPanggung).toLowerCase().includes(q)));
+      const n = list.length, avgXP = n ? Math.round(list.reduce((s, p) => s + p.totalXP, 0) / n) : 0;
+      const card = (v, l, c) => `<div class="bg-${c}-50 rounded-lg p-2"><div class="text-lg font-black text-${c}-700">${v}</div><div class="text-[10px] text-slate-500">${l}</div></div>`;
+      $("hrSummary").innerHTML = `<div class="grid grid-cols-3 gap-2 text-center">${card(n, "Peserta", "sky")}${card(avgXP, "Rata-rata XP", "amber")}${card(list.filter(p => p.passed === 6).length, "Lulus 6 level", "emerald")}</div>`;
+      if (!n) { $("hrTable").innerHTML = `<p class="text-slate-400 py-4 text-center text-xs">Belum ada data nilai.</p>`; return; }
+      const rate = l => { const a = list.filter(p => p.levels[l]); return a.length ? Math.round(a.filter(p => p.levels[l].best >= 70).length / a.length * 100) + "%" : "-"; };
+      const head = [1, 2, 3, 4, 5, 6].map(l => `<th class="px-2 py-1" title="${esc(getLevelName(l))}">L${l}<div class="font-normal text-[9px] text-slate-400">${rate(l)} lulus</div></th>`).join("");
+      const detail = p => `<tr><td colspan="11" class="bg-slate-50 p-3 text-[11px] space-y-2"><div class="font-bold text-slate-700">Detail Level</div>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-2">${[1, 2, 3, 4, 5, 6].map(l => { const x = p.levels[l];
+          return x ? `<div class="border rounded-lg p-2 bg-white"><b>Level ${l}</b> ${esc(getLevelName(l))}<br>Terbaik <b class="${x.best >= 70 ? 'text-emerald-600' : 'text-rose-600'}">${x.best}%</b> ${x.best >= 70 ? "✓ lulus" : "✗ belum lulus"}<br>${x.attempts} percobaan • ${x.xp} XP<br><span class="text-slate-400">${fdate(x.last)}</span></div>`
+                   : `<div class="border rounded-lg p-2 bg-white text-slate-400"><b>Level ${l}</b> belum dikerjakan</div>`; }).join("")}</div>
+        <div class="font-bold text-slate-700">Duel Arena</div>
+        ${p.duels.length ? p.duels.map(d => `<div>⚔️ ${esc(d.id)} — skor <b>${d.score}%</b> • ${d.xp} XP • <span class="text-slate-400">${fdate(d.ts)}</span></div>`).join("") : `<div class="text-slate-400">Belum ada duel.</div>`}
+        <div class="text-slate-500">XP: level ${p.levelXP} + duel ${p.duelXP} = <b>${p.totalXP}</b> • Aktivitas terakhir ${fdate(p.lastActive)}</div></td></tr>`;
+      const rows = list.map(p => {
+        const medal = p._i === 0 ? "🥇" : p._i === 1 ? "🥈" : p._i === 2 ? "🥉" : p._i + 1;
+        const cells = [1, 2, 3, 4, 5, 6].map(l => { const x = p.levels[l]; return x ? `<td class="px-2 py-1.5 text-center font-bold ${x.best >= 70 ? 'text-emerald-600' : 'text-rose-600'}">${x.best}%</td>` : `<td class="px-2 py-1.5 text-center text-slate-300">–</td>`; }).join("");
+        return `<tr onclick="toggleHR(${p._i})" class="border-t cursor-pointer hover:bg-sky-50"><td class="px-2 py-1.5 font-black text-slate-500">${medal}</td>
+          <td class="px-2 py-1.5"><div class="font-bold text-slate-800">${esc(p.namaPanggung)}</div><div class="text-[10px] text-slate-500">${esc(p.namaLengkap)} • ${esc(p.divisi)}</div></td>${cells}
+          <td class="px-2 py-1.5 text-center">${p.duels.length ? `<b>${p.avgDuel}%</b><div class="text-[9px] text-slate-400">${p.duels.length} duel</div>` : "–"}</td>
+          <td class="px-2 py-1.5 text-right font-black text-sky-700 whitespace-nowrap">${p.totalXP} XP</td></tr>${hrOpen[p._i] ? detail(p) : ""}`;
+      }).join("");
+      $("hrTable").innerHTML = `<table class="w-full text-xs"><thead class="text-slate-500 text-left"><tr><th class="px-2 py-1">#</th><th class="px-2 py-1">Peserta</th>${head}<th class="px-2 py-1 text-center">Duel</th><th class="px-2 py-1 text-right">Total</th></tr></thead><tbody>${rows}</tbody></table>`;
+    }
+
+    function exportHRCsv() {
+      if (!hrData) return;
+      const head = ["Peringkat", "Nama Lengkap", "Alias", "Divisi", "L1", "L2", "L3", "L4", "L5", "L6", "Rata-rata Level", "Jumlah Duel", "Rata-rata Duel", "XP Level", "XP Duel", "Total XP", "Aktivitas Terakhir"];
+      const rows = hrData.participants.map((p, i) => [i + 1, p.namaLengkap, p.namaPanggung, p.divisi, ...[1, 2, 3, 4, 5, 6].map(l => p.levels[l] ? p.levels[l].best : ""), p.avgLevel, p.duels.length, p.avgDuel, p.levelXP, p.duelXP, p.totalXP, p.lastActive]);
+      const cell = v => { let s = String(v ?? ""); if (/^[=+\-@]/.test(s)) s = "'" + s; return '"' + s.replace(/"/g, '""') + '"'; };
+      const csv = "\ufeff" + [head, ...rows].map(r => r.map(cell).join(",")).join("\n");
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+      a.download = "nilai-cs-excellent.csv"; a.click();
     }
 
     // ---------- Confetti ----------
