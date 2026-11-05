@@ -152,6 +152,7 @@
             🎡 Spin &amp; Tandingkan Semua Peserta
           </button>
         </div>
+        <div id="onlinePanel" class="text-xs bg-slate-50 border border-slate-200 rounded-xl p-3 space-y-1"></div>
         <div id="matchResult" class="text-xs space-y-1"></div>
         <div id="duelBoard" class="text-xs space-y-1"></div>
       </section>
@@ -804,13 +805,24 @@
     }
 
     // ---------- Heartbeat & Matchmaking ----------
+    let wakeLock = null;
+    async function keepAwake() {              // cegah layar HP mati agar heartbeat tetap terkirim
+      try { if ("wakeLock" in navigator && document.visibilityState === "visible") wakeLock = await navigator.wakeLock.request("screen"); } catch (e) {}
+    }
+    function sendBeat() {
+      if (!currentUser) return;
+      fetch(`${CONFIG.APPS_SCRIPT_URL}?action=heartbeat&nama=${encodeURIComponent(currentUser.namaPanggung)}&namaLengkap=${encodeURIComponent(currentUser.namaLengkap)}&tim=${encodeURIComponent(currentUser.divisi)}`, { keepalive: true }).catch(() => {});
+    }
+    document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && currentUser) { sendBeat(); keepAwake(); } });
+    window.addEventListener("online", sendBeat);
+
     function startHeartbeat() {
       if (!currentUser) return;
       clearInterval(heartbeatInterval);
-      const beat = () => fetch(`${CONFIG.APPS_SCRIPT_URL}?action=heartbeat&nama=${encodeURIComponent(currentUser.namaPanggung)}&namaLengkap=${encodeURIComponent(currentUser.namaLengkap)}&tim=${encodeURIComponent(currentUser.divisi)}`).catch(() => {});
-      beat();
-      heartbeatInterval = setInterval(beat, 10000);
-      if (currentUser.isTrainer) startBoardPoll(); else startRoomPoll();
+      sendBeat();
+      heartbeatInterval = setInterval(sendBeat, 10000);
+      keepAwake();
+      if (currentUser.isTrainer) { startBoardPoll(); startOnlinePoll(); } else startRoomPoll();
     }
 
     function triggerHRAutoMatchmaking() {
@@ -820,7 +832,7 @@
         .then(res => res.json())
         .then(data => {
           if (data.status !== "success" || !data.rooms.length) {
-            box.innerHTML = `<p class="text-amber-600 font-semibold">${data.status === "busy" ? "Semua peserta online masih dalam duel." : "Belum ada peserta online."}</p>`;
+            box.innerHTML = `<p class="text-amber-600 font-semibold">${data.status === "busy" ? "Semua peserta online masih dalam duel." : data.status === "error" ? "Server error: " + esc(data.message) : "Belum ada peserta online. Pastikan peserta sudah login dan layar tetap menyala."}</p>`;
             return;
           }
           box.innerHTML = data.rooms.map(r =>
@@ -1088,6 +1100,21 @@
       }).catch(() => {});
       go();
       boardPoll = setInterval(go, 4000);
+    }
+
+    // --- trainer: daftar peserta online (real-time) ---
+    let onlinePoll = null;
+    function startOnlinePoll() {
+      clearInterval(onlinePoll);
+      const go = () => fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getOnlineUsers`).then(r => r.json()).then(d => {
+        const u = d.users || [];
+        const html = `<div class="font-bold text-slate-700">👥 Peserta online (${u.length})</div>` + (u.length
+          ? u.map(x => `<div class="flex justify-between gap-2"><span>${esc(x.nama)} <span class="text-slate-400">• ${esc(x.namaLengkap)} • ${esc(x.tim)}</span></span><span class="text-emerald-600 whitespace-nowrap">${esc(x.ageSec)} dtk lalu</span></div>`).join("")
+          : `<div class="text-slate-400">Belum ada. Minta peserta login dan biarkan layar tetap menyala.</div>`);
+        setHtml($("onlinePanel"), html, html);
+      }).catch(() => { $("onlinePanel").innerHTML = `<div class="text-rose-500">Gagal menghubungi server. Cek URL Apps Script dan deployment.</div>`; $("onlinePanel").dataset.k = ""; });
+      go();
+      onlinePoll = setInterval(go, 5000);
     }
 
     // ---------- Confetti ----------
