@@ -87,7 +87,7 @@
         </div>
         <div class="space-y-2">
           <h2 class="text-sm font-bold text-slate-700 flex items-center gap-1.5"><i class="fa-solid fa-map text-sky-600"></i> Peta Arena Latihan</h2>
-          <p class="text-xs text-slate-500">Selesaikan setiap level minimal peringkat 🙂 (75%)</p>
+          <p class="text-xs text-slate-500">Selesaikan setiap level dengan nilai minimal 70% untuk membuka level berikutnya</p>
         </div>
         <div id="levelPathContainer" class="space-y-3"></div>
       </section>
@@ -159,24 +159,25 @@
       <!-- 6. ARENA DUEL -->
       <section id="viewArena" class="hidden -m-4 p-4 min-h-[85vh] bg-gradient-to-b from-stone-950 via-red-950 to-stone-950 text-amber-50 space-y-3">
         <div class="flex items-center justify-between text-[10px] font-bold tracking-widest text-amber-300">
-          <span>🏛️ ARENA CS DUEL • <span id="arRoom"></span></span>
+          <span>🏛️ ARENA CS DUEL • RONDE <span id="arRound">1</span>/2</span>
           <button id="btnMute" onclick="toggleMute()" class="text-base">🔔</button>
         </div>
         <div class="text-center">
           <div id="arPhase" class="text-xs font-black tracking-widest text-amber-400">⏳ BERSIAP</div>
           <div id="arClock" class="text-5xl font-black tabular-nums text-white drop-shadow">00:00</div>
-          <div id="arScenario" class="text-[11px] text-amber-200/80 italic"></div>
         </div>
         <div class="grid grid-cols-2 gap-2 text-center">
           <div class="bg-sky-950/70 border border-sky-500/50 rounded-xl p-2">
             <div class="text-2xl">🛡️</div><div class="text-[10px] text-sky-300 font-bold tracking-wider">CS</div>
             <div id="arCsName" class="text-xs font-bold truncate"></div>
             <div id="arCsPts" class="text-2xl font-black text-sky-300">0</div>
+            <div id="arCsMeta" class="text-[9px] text-sky-200/70"></div>
           </div>
           <div class="bg-red-950/70 border border-red-500/50 rounded-xl p-2">
             <div class="text-2xl">🔥</div><div class="text-[10px] text-red-300 font-bold tracking-wider">AGEN</div>
             <div id="arAgenName" class="text-xs font-bold truncate"></div>
             <div id="arAgenPts" class="text-2xl font-black text-red-300">0</div>
+            <div id="arAgenMeta" class="text-[9px] text-red-200/70"></div>
           </div>
         </div>
         <div>
@@ -185,10 +186,12 @@
         </div>
         <div id="arBrief" class="text-[11px] bg-black/30 border border-amber-900/50 rounded-lg p-2 text-amber-100"></div>
         <div id="arChat" class="h-64 overflow-y-auto space-y-2 bg-black/30 rounded-xl p-2 border border-amber-900/50"></div>
+        <div id="arPauseBox" class="hidden text-[11px] bg-amber-950/60 border border-amber-600 rounded-lg p-2 flex items-center justify-between gap-2"></div>
         <div class="flex gap-2">
-          <input id="arInput" type="text" maxlength="400" disabled placeholder="Ketik balasan / keluhanmu..." onkeydown="if(event.key==='Enter')sendDuelMsg()" class="flex-1 px-3 py-2 text-xs rounded-lg bg-stone-900 border border-amber-900 text-white outline-none focus:ring-2 focus:ring-amber-500">
-          <button id="arSend" disabled onclick="sendDuelMsg()" class="px-3 py-2 bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-stone-950 font-black text-xs rounded-lg">Serang ⚔️</button>
+          <input id="arInput" type="text" maxlength="400" disabled placeholder="Menunggu pertandingan..." onkeydown="if(event.key==='Enter')sendDuelMsg()" class="flex-1 px-3 py-2 text-xs rounded-lg bg-stone-900 border border-amber-900 text-white outline-none focus:ring-2 focus:ring-amber-500">
+          <button id="arSend" disabled onclick="sendDuelMsg()" class="px-3 py-2 bg-amber-500 hover:bg-amber-400 disabled:opacity-40 text-stone-950 font-black text-xs rounded-lg">Kirim ⚔️</button>
         </div>
+        <button id="arPauseBtn" disabled onclick="pauseAct('request')" class="w-full py-1.5 text-[11px] font-bold rounded-lg bg-stone-800 border border-amber-900 text-amber-200 disabled:opacity-40">⏸️ Ajukan Jeda</button>
       </section>
 
     </main>
@@ -675,11 +678,11 @@
         if (typeof ev.percentage !== "number") throw new Error("format salah");
       } catch (err) {
         const pct = localScore(val, q);
-        ev = { csat: pct >= 75 ? "🙂" : "🙁", percentage: pct, feedback: "Server evaluasi tidak tersedia, dinilai otomatis berdasarkan unsur jawaban." };
+        ev = { csat: pct >= 70 ? "🙂" : "🙁", percentage: pct, feedback: "Server evaluasi tidak tersedia, dinilai otomatis berdasarkan unsur jawaban." };
       }
       if (finished) return; // waktu habis saat menunggu evaluasi
 
-      const ok = ev.percentage >= 75;
+      const ok = ev.percentage >= 70;
       if (ok) currentScore++;
       btn.innerText = "Terkirim";
 
@@ -704,13 +707,13 @@
       const total = LEVEL_QUESTIONS[currentLevel].length;
       const pct = Math.min(100, Math.round((currentScore / total) * 100));
       const xp = pct * 2;
-      const passed = pct >= 75;
+      const passed = pct >= 70;
 
       let emoji = "😍", title = "Sangat Baik!";
       if (pct < 40) { emoji = "😡"; title = "Perlu Belajar Lagi"; }
-      else if (pct < 60) { emoji = "🙁"; title = "Kurang"; }
-      else if (pct < 75) { emoji = "😐"; title = "Sedang"; }
-      else if (pct < 90) { emoji = "🙂"; title = "Baik"; }
+      else if (pct < 55) { emoji = "🙁"; title = "Kurang"; }
+      else if (pct < 70) { emoji = "😐"; title = "Belum Lulus"; }
+      else if (pct < 85) { emoji = "🙂"; title = "Lulus, Baik"; }
 
       if (passed) {
         localStorage.setItem(passKey(currentLevel), "true");
@@ -723,7 +726,7 @@
       document.getElementById("resultXP").innerText = `+${xp} XP`;
       document.getElementById("resultMsg").innerText = passed
         ? (currentLevel < 6 ? "Level lulus! Level berikutnya sudah terbuka." : "Selamat, semua level sudah kamu selesaikan!")
-        : "Belum lulus. Capai minimal 75% untuk membuka level berikutnya.";
+        : "Belum lulus. Capai minimal 70% untuk membuka level berikutnya.";
       document.getElementById("btnResultNext").innerText = (passed && currentLevel < 6) ? "Lanjut ke Level Berikutnya" : "Kembali ke Peta";
 
       postJSON({
@@ -817,7 +820,7 @@
         .then(res => res.json())
         .then(data => {
           if (data.status !== "success" || !data.rooms.length) {
-            box.innerHTML = `<p class="text-amber-600 font-semibold">Belum ada peserta online.</p>`;
+            box.innerHTML = `<p class="text-amber-600 font-semibold">${data.status === "busy" ? "Semua peserta online masih dalam duel." : "Belum ada peserta online."}</p>`;
             return;
           }
           box.innerHTML = data.rooms.map(r =>
@@ -827,27 +830,45 @@
         .catch(() => { box.innerHTML = `<p class="text-rose-500 font-semibold">Gagal terhubung ke server.</p>`; });
     }
 
-    // ---------- ARENA DUEL ----------
+    // ---------- ARENA DUEL (2 ronde, peran bertukar) ----------
+    const PAUSE_MAX_MS = 180000;
     let duel = null, duelPoll = null, duelTick = null, roomPoll = null, boardPoll = null, duelPendingRoom = null;
-    let clockOffset = 0, duelRoomId = null, lastPhase = "", lastBeep = -1, renderedMsgs = -1;
+    let clockOffset = 0, duelRoomId = null, lastKey = "", lastBeep = -1, renderedKey = "", curRound = -1, ovKey = "", finalTries = 0;
     let duelSending = false, duelFinished = false, muted = false, audioCtx = null;
     const $ = id => document.getElementById(id);
     const nowMs = () => Date.now() + clockOffset;
+    const me = () => currentUser.namaPanggung;
     const fmt = s => { s = Math.max(0, Math.ceil(s)); return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0"); };
-    const hitLabel = p => p >= 85 ? "💥 Serangan telak" : p >= 70 ? "⚔️ Kena" : p >= 50 ? "🛡️ Tertahan" : "💢 Meleset";
+    const sideScore = (sum, n) => n ? Math.round(sum / n * Math.min(1, n / 5)) : 0;
+    const setHtml = (el, key, html) => { if (el.dataset.k !== key) { el.innerHTML = html; el.dataset.k = key; } };
 
-    // fase pertandingan (sama dengan server): jeda 10 detik saat sisa 60 detik
-    function duelPhase(st, now) {
-      const e = (now - st.startAt) / 1000, pa = st.duration - 60;
+    // --- logika waktu (sama dengan server) ---
+    function effT(r, now) {
+      let pm = r.pausedMs || 0;
+      if (r.pausedAt) { const d = now - r.pausedAt; if (d <= PAUSE_MAX_MS) return r.pausedAt - pm; pm += PAUSE_MAX_MS; }
+      return now - pm;
+    }
+    function isPaused(r, now) { return !!r.pausedAt && (now - r.pausedAt) <= PAUSE_MAX_MS; }
+    function roundPhase(r, now) {
+      const e = (effT(r, now) - r.startAt) / 1000, pa = r.duration - 60;
       if (e < 0) return { p: "wait", left: -e, pauseLeft: 0 };
-      if (e < pa) return { p: "fight", left: st.duration - e, pauseLeft: 0 };
+      if (e < pa) return { p: "fight", left: r.duration - e, pauseLeft: 0 };
       if (e < pa + 10) return { p: "pause", left: 60, pauseLeft: pa + 10 - e };
       const e2 = e - 10;
-      if (e2 < st.duration) return { p: "fight", left: st.duration - e2, pauseLeft: 0 };
+      if (e2 < r.duration) return { p: "fight", left: r.duration - e2, pauseLeft: 0 };
       return { p: "end", left: 0, pauseLeft: 0 };
     }
+    function duelStage(st, now) {
+      const p1 = roundPhase(st.r[0], now);
+      if (p1.p !== "end") return { i: 0, ph: p1 };
+      const p2 = roundPhase(st.r[1], now);
+      if (p2.p === "end") return { i: 1, ph: p2, fin: true };
+      if (p2.p === "wait" && p2.left > 15) return { i: 1, ph: p2, brk: true };
+      return { i: 1, ph: p2 };
+    }
+    const roleIn = r => me() === r.cs ? "cs" : me() === r.agen ? "agen" : "watch";
 
-    // suara (WebAudio, tanpa file)
+    // --- suara (WebAudio, tanpa file) ---
     function unlockAudio() {
       try { audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === "suspended") audioCtx.resume(); } catch (e) {}
     }
@@ -859,19 +880,17 @@
       g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
       o.connect(g); g.connect(audioCtx.destination); o.start(t); o.stop(t + dur);
     }
-    function bell(n) {
-      for (let i = 0; i < n; i++) [659, 1318, 1976, 2637].forEach((f, j) => tone(f, 1.8, [0.35, 0.2, 0.12, 0.06][j], "sine", i * 0.7));
-    }
+    function bell(n) { for (let i = 0; i < n; i++) [659, 1318, 1976, 2637].forEach((f, j) => tone(f, 1.8, [0.35, 0.2, 0.12, 0.06][j], "sine", i * 0.7)); }
     function beep() { tone(880, 0.12, 0.2, "square", 0); }
     function toggleMute() { muted = !muted; $("btnMute").innerText = muted ? "🔇" : "🔔"; }
 
-    // peserta: cek apakah sudah dapat lawan setelah Trainer menekan Spin
+    // --- peserta: masuk arena otomatis setelah Trainer menekan Spin ---
     function startRoomPoll() {
       clearInterval(roomPoll);
       const check = async () => {
         if (!currentUser || currentUser.isTrainer || duelRoomId) return;
         try {
-          const r = await (await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getMyRoom&nama=${encodeURIComponent(currentUser.namaPanggung)}`)).json();
+          const r = await (await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getMyRoom&nama=${encodeURIComponent(me())}`)).json();
           if (r.status !== "success" || sessionStorage.getItem("duel_done_" + r.roomId)) return;
           if (!$("viewQuiz").classList.contains("hidden")) {
             duelPendingRoom = r.roomId; $("duelBannerRoom").innerText = r.roomId; $("duelBanner").classList.remove("hidden");
@@ -884,9 +903,10 @@
 
     function enterArena(roomId) {
       unlockAudio();
-      duelRoomId = roomId; duel = null; lastPhase = ""; lastBeep = -1; renderedMsgs = -1; duelFinished = false; duelSending = false;
+      duelRoomId = roomId; duel = null; lastKey = ""; lastBeep = -1; renderedKey = ""; curRound = -1; ovKey = ""; finalTries = 0;
+      duelFinished = false; duelSending = false;
       finished = true; clearInterval(timerInterval);
-      $("duelBanner").classList.add("hidden"); $("arChat").innerHTML = ""; $("arRoom").innerText = roomId;
+      $("duelBanner").classList.add("hidden"); $("arChat").innerHTML = ""; $("arOverlay").innerHTML = ""; $("arOverlay").dataset.k = "";
       showView("viewArena");
       clearInterval(duelPoll); clearInterval(duelTick);
       pollDuel();
@@ -897,120 +917,174 @@
     async function pollDuel() {
       if (!duelRoomId) return;
       try {
-        const r = await (await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getDuel&room=${encodeURIComponent(duelRoomId)}&nama=${encodeURIComponent(currentUser.namaPanggung)}`)).json();
+        const r = await (await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getDuel&room=${encodeURIComponent(duelRoomId)}&nama=${encodeURIComponent(me())}`)).json();
         if (r.status !== "success") return;
         clockOffset = r.serverNow - Date.now();
-        const first = !duel;
         duel = r;
-        if (first) {
-          $("arCsName").innerText = r.cs; $("arAgenName").innerText = r.agen; $("arScenario").innerText = "Skenario: " + r.judul;
-          $("arBrief").innerHTML = r.role === "agen"
-            ? `<strong>🎭 Briefing Agen (rahasia):</strong> ${esc(r.briefing)}<br>Tulis keluhan lanjutan agar CS teruji!`
-            : `<strong>🛡️ Kamu CS.</strong> Agen akan complain. Balas dengan empati, tindakan, dan estimasi yang jelas. Tiap balasan dinilai!`;
-          $("arInput").placeholder = r.role === "agen" ? "Tulis keluhanmu sebagai agen..." : "Tulis balasan CS...";
-        }
-        renderDuel();
+        renderDuel(duelStage(duel, nowMs()));
       } catch (e) {}
     }
 
-    function renderDuel() {
+    function renderDuel(stg) {
       if (!duel) return;
-      $("arCsPts").innerText = duel.csPts; $("arAgenPts").innerText = duel.agenPts;
-      const tot = duel.csPts + duel.agenPts, share = tot ? Math.round(duel.csPts / tot * 100) : 50;
+      const r = duel.r[stg.i], role = roleIn(r);
+      if (stg.i !== curRound) {
+        curRound = stg.i; renderedKey = "";
+        $("arRound").innerText = stg.i + 1;
+        $("arCsName").innerText = r.cs; $("arAgenName").innerText = r.agen;
+        $("arBrief").innerHTML = role === "agen"
+          ? `<strong>🔥 Kamu AGEN.</strong> Mulailah komplain tentang apa saja terkait layanan server pulsa/PPOB (transaksi, saldo, deposit, harga, dll). Buat realistis: sebut nominal, waktu, atau nomor, tunjukkan emosi bertahap, dan tuntut kepastian. Jangan menghina. Keluhanmu juga dinilai!`
+          : role === "cs"
+          ? `<strong>🛡️ Kamu CS.</strong> Tunggu agen mulai komplain, lalu balas dengan empati, tindakan konkret, dan estimasi waktu. Tiap balasan dinilai.`
+          : `<strong>👀 Mode pantau.</strong> Kamu melihat duel ini tanpa ikut menulis.`;
+        $("arInput").placeholder = role === "agen" ? "Tulis keluhanmu sebagai agen..." : "Tulis balasan CS...";
+      }
+      const cs = sideScore(r.csSum, r.csN), ag = sideScore(r.agSum, r.agN);
+      $("arCsPts").innerText = cs; $("arAgenPts").innerText = ag;
+      $("arCsMeta").innerText = `${Math.min(r.csN, 5)}/5 balasan dinilai`; $("arAgenMeta").innerText = `${Math.min(r.agN, 5)}/5 keluhan dinilai`;
+      const share = cs + ag ? Math.round(cs / (cs + ag) * 100) : 50;
       $("arBar").style.width = share + "%";
       $("arDom").innerText = share >= 60 ? `🛡️ CS mendominasi (${share}%)` : share <= 40 ? `🔥 Agen mendominasi (${100 - share}%)` : `⚖️ Imbang (${share}% : ${100 - share}%)`;
-      const vis = duel.msgs.filter(m => m.ts <= nowMs());
-      if (vis.length === renderedMsgs) return;
-      renderedMsgs = vis.length;
+      const vis = r.msgs.filter(m => m.ts <= nowMs()), key = stg.i + ":" + vis.length;
+      if (key === renderedKey) return;
+      renderedKey = key;
       const box = $("arChat");
-      box.innerHTML = vis.map(m => {
-        const cs = m.r === "cs";
-        const chip = !cs ? "" : m.x
-          ? `<div class="text-[9px] text-slate-300 mt-1">belum dinilai (menunggu agen bicara)</div>`
-          : `<div class="text-[10px] font-bold mt-1 ${m.p >= 70 ? 'text-emerald-300' : m.p >= 50 ? 'text-amber-300' : 'text-rose-300'}">${hitLabel(m.p)} • CS +${m.c} • Agen +${m.a}</div>`;
-        return `<div class="flex ${cs ? 'justify-end' : 'justify-start'}"><div class="max-w-[85%] px-3 py-2 rounded-xl text-xs ${cs ? 'bg-sky-700 text-white' : 'bg-red-800 text-red-50'}"><div class="text-[9px] opacity-70 font-bold">${cs ? '🛡️' : '🔥'} ${esc(m.n)}</div>${esc(m.t)}${chip}</div></div>`;
-      }).join("");
+      box.innerHTML = vis.length ? vis.map(m => {
+        const isCs = m.r === "cs";
+        const tag = isCs ? (p => p >= 85 ? "💥 Serangan telak" : p >= 70 ? "⚔️ Kena" : p >= 50 ? "🛡️ Tertahan" : "💢 Meleset")(m.p)
+                         : (p => p >= 85 ? "🔥 Tekanan tinggi" : p >= 70 ? "🔥 Tekanan kuat" : p >= 50 ? "🔥 Tekanan sedang" : "🔥 Tekanan lemah")(m.p);
+        const chip = m.x ? `<div class="text-[9px] text-slate-300 mt-1">belum dinilai (menunggu giliran lawan)</div>`
+          : `<div class="text-[10px] font-bold mt-1 ${m.p >= 70 ? 'text-emerald-300' : m.p >= 50 ? 'text-amber-300' : 'text-rose-300'}">${tag} • ${m.p}</div><div class="text-[9px] opacity-80">${esc(m.f || "")}</div>`;
+        return `<div class="flex ${isCs ? 'justify-end' : 'justify-start'}"><div class="max-w-[85%] px-3 py-2 rounded-xl text-xs ${isCs ? 'bg-sky-700 text-white' : 'bg-red-800 text-red-50'}"><div class="text-[9px] opacity-70 font-bold">${isCs ? '🛡️' : '🔥'} ${esc(m.n)}</div>${esc(m.t)}${chip}</div></div>`;
+      }).join("") : `<p class="text-center text-[11px] text-amber-200/70 py-6">${role === "agen" ? "Giliranmu! Mulailah komplain..." : "Menunggu agen memulai komplain..."}</p>`;
       box.scrollTop = box.scrollHeight;
+    }
+
+    function setOverlay(key, html) {
+      const ov = $("arOverlay");
+      if (!key) { ov.classList.add("hidden"); ovKey = ""; return; }
+      ov.classList.remove("hidden");
+      if (key !== ovKey) { ov.innerHTML = html; ovKey = key; }
+    }
+
+    function breakHtml() {
+      const r1 = duel.r[0], r2 = duel.r[1], role2 = roleIn(r2);
+      const mine = r1.msgs.filter(m => m.n === me() && m.p != null).slice(-8);
+      return `<div class="w-full max-w-sm max-h-[90vh] overflow-y-auto text-center space-y-3">
+        <div class="text-4xl">☕</div><div class="text-amber-300 font-black tracking-widest">RONDE 1 SELESAI</div>
+        <div class="text-xs">Skor ronde 1 → 🛡️ CS ${sideScore(r1.csSum, r1.csN)} • 🔥 Agen ${sideScore(r1.agSum, r1.agN)}</div>
+        <div class="text-xs text-amber-100">Ronde 2 dimulai dalam</div>
+        <div id="ovCount" class="text-5xl font-black text-white tabular-nums">--:--</div>
+        ${role2 !== "watch" ? `<div class="text-xs bg-black/40 rounded-lg p-2">Peran ronde 2: kamu menjadi <b>${role2 === "cs" ? "CS 🛡️" : "Agen 🔥"}</b>. Tetap buka halaman ini; kamu akan masuk otomatis.</div>` : ""}
+        <div class="text-left text-[11px] bg-black/40 rounded-lg p-2 space-y-1"><b>Rapor pesanmu (ronde 1)</b>${mine.map(m => `<div>• ${esc(m.t.slice(0, 60))} → <b>${m.p}</b> <span class="opacity-70">${esc(m.f || "")}</span></div>`).join("") || "<div>Belum ada pesan yang dinilai.</div>"}</div></div>`;
+    }
+
+    function renderPauseUI(stg, role, r, now) {
+      const box = $("arPauseBox"), btn = $("arPauseBtn");
+      const live = !stg.brk && !stg.fin, paused = live && isPaused(r, now);
+      const req = live && r.pauseReq && now - r.pauseReq.ts < 30000 ? r.pauseReq : null;
+      const left = 2 - (r.pauseCnt || 0);
+      btn.disabled = !(role !== "watch" && live && stg.ph.p === "fight" && !paused && !req && left > 0);
+      btn.innerText = `⏸️ Ajukan Jeda (${Math.max(left, 0)} tersisa)`;
+      if (req && !paused && role !== "watch") {
+        box.classList.remove("hidden");
+        setHtml(box, "q" + req.by + req.ts, req.by === me()
+          ? `<span>⏳ Menunggu persetujuan lawan...</span><button onclick="pauseAct('cancel')" class="px-2 py-1 bg-stone-700 rounded font-bold">Batal</button>`
+          : `<span>⏸️ <b>${esc(req.by)}</b> mengajukan jeda.</span><span class="flex gap-1"><button onclick="pauseAct('accept')" class="px-2 py-1 bg-emerald-600 rounded font-bold">Setuju</button><button onclick="pauseAct('decline')" class="px-2 py-1 bg-rose-700 rounded font-bold">Tolak</button></span>`);
+      } else box.classList.add("hidden");
     }
 
     function tickDuel() {
       if (!duel || duelFinished) return;
-      const ph = duelPhase(duel, nowMs());
-      $("arPhase").innerText = { wait: "⏳ BERSIAP", fight: "⚔️ BERTARUNG", pause: "⏸️ JEDA", end: "🏁 SELESAI" }[ph.p];
+      const now = nowMs(), stg = duelStage(duel, now), r = duel.r[stg.i], ph = stg.ph, role = roleIn(r);
+      if (stg.i !== curRound) renderDuel(stg);
+      const paused = !stg.fin && !stg.brk && isPaused(r, now);
+      $("arPhase").innerText = stg.brk ? "☕ JEDA ANTAR RONDE" : paused ? "⏸️ DIJEDA (DISEPAKATI)" : { wait: "⏳ BERSIAP", fight: "⚔️ BERTARUNG", pause: "⏸️ JEDA 10 DETIK", end: "🏁 SELESAI" }[ph.p];
       $("arClock").innerText = fmt(ph.left);
       $("arClock").className = "text-5xl font-black tabular-nums drop-shadow " +
-        (ph.p === "fight" && ph.left <= 10 ? "text-red-400 animate-pulse" : ph.p === "fight" && ph.left <= 60 ? "text-amber-300" : "text-white");
-      if (ph.p === "wait") { const s = Math.ceil(ph.left); if (s <= 3 && s !== lastBeep) { lastBeep = s; beep(); } }
-      if (ph.p !== lastPhase) {
-        if (ph.p === "fight") bell(2); else if (ph.p === "pause") bell(1); else if (ph.p === "end") bell(3);
-        lastPhase = ph.p;
+        (ph.p === "fight" && !paused && ph.left <= 10 ? "text-red-400 animate-pulse" : ph.p === "fight" && ph.left <= 60 ? "text-amber-300" : "text-white");
+      if (ph.p === "wait" && !stg.brk) { const s = Math.ceil(ph.left); if (s <= 3 && s !== lastBeep) { lastBeep = s; beep(); } }
+      const key = stg.fin ? "fin" : stg.brk ? "brk" : stg.i + ph.p;
+      if (key !== lastKey) {
+        if (key === "fin" || key === "brk") bell(3); else if (ph.p === "fight") bell(2); else if (ph.p === "pause") bell(1);
+        lastKey = key;
       }
-      const ov = $("arOverlay");
-      if (ph.p === "pause") {
-        ov.classList.remove("hidden");
-        ov.innerHTML = `<div class="text-center space-y-2"><div class="text-5xl">⏸️</div><div class="text-amber-300 font-black tracking-widest">JEDA PERTANDINGAN</div><div class="text-6xl font-black text-white tabular-nums">${Math.ceil(ph.pauseLeft)}</div><p class="text-xs text-amber-100 max-w-xs">Sisa 1 menit terakhir. Tarik napas, atur strategi, lalu bertarung lagi!</p></div>`;
-      } else if (ph.p !== "end") ov.classList.add("hidden");
-      const canType = ph.p === "fight";
+      if (stg.fin) {
+        duelFinished = true; clearInterval(duelTick); setOverlay(null);
+        setTimeout(() => pollDuel().then(showFinal), 1500);
+        return;
+      }
+      if (stg.brk) setOverlay("brk", breakHtml());
+      else if (ph.p === "pause") setOverlay("auto", `<div class="text-center space-y-2"><div class="text-5xl">⏸️</div><div class="text-amber-300 font-black tracking-widest">JEDA PERTANDINGAN</div><div id="ovCount" class="text-6xl font-black text-white tabular-nums">10</div><p class="text-xs text-amber-100 max-w-xs">Sisa 1 menit terakhir. Tarik napas, atur strategi, lalu bertarung lagi!</p></div>`);
+      else if (paused) setOverlay("man", `<div class="text-center space-y-2"><div class="text-5xl">⏸️</div><div class="text-amber-300 font-black tracking-widest">DIJEDA ATAS KESEPAKATAN</div><div id="ovCount" class="text-5xl font-black text-white tabular-nums">03:00</div><p class="text-xs text-amber-100 max-w-xs">Waktu pertandingan berhenti. Lanjut otomatis saat sisa waktu habis.</p>${role !== "watch" ? `<button onclick="pauseAct('resume')" class="px-4 py-2 bg-amber-500 text-stone-950 font-black text-sm rounded-xl">▶️ Lanjutkan</button>` : ""}</div>`);
+      else setOverlay(null);
+      const oc = $("ovCount");
+      if (oc) oc.innerText = stg.brk ? fmt(ph.left) : paused ? fmt((PAUSE_MAX_MS - (now - r.pausedAt)) / 1000) : Math.ceil(ph.pauseLeft);
+      const canType = role !== "watch" && !stg.brk && ph.p === "fight" && !paused;
       $("arInput").disabled = !canType; $("arSend").disabled = !canType;
-      if (ph.p === "end") {
-        duelFinished = true; clearInterval(duelTick);
-        setTimeout(() => pollDuel().then(finishDuel), 1200);
-      }
+      renderPauseUI(stg, role, r, now);
     }
 
     async function sendDuelMsg() {
       const inp = $("arInput"), text = inp.value.trim();
-      if (!duel || !text || duelSending || duelPhase(duel, nowMs()).p !== "fight") return;
+      if (!duel || !text || duelSending) return;
       duelSending = true; inp.value = ""; $("arSend").innerText = "...";
-      try { await postJSON({ action: "duelSend", room: duelRoomId, nama: currentUser.namaPanggung, text }); }
-      catch (e) { inp.value = text; }
-      duelSending = false; $("arSend").innerText = "Serang ⚔️";
+      try { await postJSON({ action: "duelSend", room: duelRoomId, nama: me(), text }); } catch (e) { inp.value = text; }
+      duelSending = false; $("arSend").innerText = "Kirim ⚔️";
       pollDuel();
     }
 
-    function finishDuel() {
+    async function pauseAct(op) {
+      try { await postJSON({ action: "duelPause", room: duelRoomId, nama: me(), op }); } catch (e) {}
+      pollDuel();
+    }
+
+    function showFinal() {
       clearInterval(duelPoll);
-      if (!duel) return;
-      const tot = duel.csPts + duel.agenPts, share = tot ? Math.round(duel.csPts / tot * 100) : 50;
-      const isCS = duel.role !== "agen";
-      const myScore = isCS ? share : 100 - share;
-      const won = isCS ? share >= 55 : share <= 45, draw = share > 45 && share < 55;
-      const xp = 50 + Math.round(myScore * 1.5) + (won ? 25 : 0);
-      const key = "duel_done_" + duelRoomId;
-      if (!sessionStorage.getItem(key)) {
-        sessionStorage.setItem(key, "1");
-        postJSON({ action: "saveResult", namaLengkap: currentUser.namaLengkap, namaPanggung: currentUser.namaPanggung,
-          divisi: currentUser.divisi, level: "DUEL-" + duelRoomId, xp, skorPct: myScore }).catch(() => {});
+      if (!duel || !duel.result) {
+        if (++finalTries <= 5) setTimeout(() => pollDuel().then(showFinal), 2000);
+        return;
       }
-      if (won) triggerConfetti();
-      const ov = $("arOverlay"); ov.classList.remove("hidden");
-      ov.innerHTML = `<div class="text-center space-y-2 max-w-xs">
-        <div class="text-6xl">${won ? "🏆" : draw ? "🤝" : "⚔️"}</div>
-        <div class="text-xl font-black text-amber-300">${won ? "KAMU MENANG!" : draw ? "PERTARUNGAN SERI" : "KAMU KALAH, TAPI BERTUMBUH"}</div>
-        <div class="text-xs text-amber-100">Dominasi: 🛡️ CS ${share}% vs 🔥 Agen ${100 - share}%<br>Poin duel: ${duel.csPts} vs ${duel.agenPts}</div>
-        <div class="text-sm font-bold text-white">Skor kamu ${myScore}% • +${xp} XP</div>
-        <div class="text-[10px] text-amber-200/80">Masuk otomatis ke nilai keseluruhan & klasemen.</div>
-        <button onclick="leaveArena()" class="w-full py-2.5 bg-amber-500 text-stone-950 font-black text-sm rounded-xl">Kembali ke Peta</button></div>`;
+      sessionStorage.setItem("duel_done_" + duelRoomId, "1");
+      const res = duel.result, p = res.players[me()];
+      let inner;
+      if (!p || currentUser.isTrainer) {
+        inner = `<div class="text-6xl">🎓</div><div class="text-xl font-black text-amber-300">SESI SELESAI</div>` +
+          Object.keys(res.players).map(n => `<div class="text-xs">${esc(n)}: skor total <b>${res.players[n].total}</b></div>`).join("");
+      } else {
+        const won = res.winner === me(), draw = res.winner === "draw";
+        const title = res.vsTrainer ? "LATIHAN SELESAI" : won ? "KAMU MENANG!" : draw ? "PERTARUNGAN SERI" : "BELUM MENANG, TERUS BERLATIH";
+        if (won) triggerConfetti();
+        inner = `<div class="text-6xl">${res.vsTrainer ? "🎓" : won ? "🏆" : draw ? "🤝" : "⚔️"}</div>
+          <div class="text-xl font-black text-amber-300">${title}</div>
+          <div class="text-xs bg-black/40 rounded-lg p-2 space-y-1">${p.rounds.map((x, i) => `<div>Ronde ${i + 1} sebagai ${x.role === "cs" ? "🛡️ CS" : "🔥 Agen"}: <b>${x.score}</b> <span class="opacity-70">(${x.n} pesan dinilai)</span></div>`).join("")}</div>
+          <div class="text-sm font-bold text-white">Skor total ${p.total}% • +${p.xp} XP</div>
+          <div class="text-[10px] text-amber-200/80">XP = skor × 2${p.bonus ? " + bonus " + p.bonus : ""}. Tersimpan otomatis ke klasemen.</div>`;
+      }
+      $("arOverlay").classList.remove("hidden"); ovKey = "fin";
+      $("arOverlay").innerHTML = `<div class="text-center space-y-2 max-w-xs w-full">${inner}<button onclick="leaveArena()" class="w-full py-2.5 bg-amber-500 text-stone-950 font-black text-sm rounded-xl">${currentUser.isTrainer ? "Kembali ke Dashboard" : "Kembali ke Peta"}</button></div>`;
     }
 
     function leaveArena() {
       clearInterval(duelPoll); clearInterval(duelTick);
-      duelRoomId = null; duel = null;
+      duelRoomId = null; duel = null; ovKey = "";
       $("arOverlay").classList.add("hidden");
-      showView("viewMap"); renderLevelMap();
+      if (currentUser.isTrainer) showView("viewTrainer"); else { showView("viewMap"); renderLevelMap(); }
     }
 
-    // trainer: pantau semua arena
+    // --- trainer: pantau semua arena & masuk sebagai lawan peserta ganjil ---
     function startBoardPoll() {
       clearInterval(boardPoll);
       const go = () => fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getDuelBoard`).then(r => r.json()).then(d => {
         const box = $("duelBoard");
         if (!d.rooms || !d.rooms.length) { box.innerHTML = ""; return; }
-        const label = { wait: "bersiap", fight: "bertarung", pause: "jeda", end: "selesai" };
-        box.innerHTML = `<h4 class="font-bold text-slate-700 pt-2">⚔️ Pantauan Arena</h4>` + d.rooms.map(r => {
-          const t = r.csPts + r.agenPts, sh = t ? Math.round(r.csPts / t * 100) : 50;
-          return `<div class="p-2 bg-slate-900 text-white rounded-lg"><div class="flex justify-between"><strong>${esc(r.roomId)}</strong><span>${label[r.phase]} ${fmt(r.left)}</span></div><div>🛡️ ${esc(r.cs)} <b>${r.csPts}</b> vs <b>${r.agenPts}</b> ${esc(r.agen)} 🔥</div><div class="h-1.5 rounded bg-red-600 mt-1 overflow-hidden"><div class="h-full bg-sky-500" style="width:${sh}%"></div></div></div>`;
+        const label = { wait: "bersiap", fight: "bertarung", pause: "jeda", break: "jeda ronde", end: "selesai" };
+        const html = `<h4 class="font-bold text-slate-700 pt-2">⚔️ Pantauan Arena</h4>` + d.rooms.map(r => {
+          const t = r.csScore + r.agScore, sh = t ? Math.round(r.csScore / t * 100) : 50;
+          const btn = r.phase === "end" ? "" : `<button onclick="enterArena('${esc(r.roomId)}')" class="mt-1 px-2 py-1 bg-amber-400 text-stone-950 font-bold rounded">${r.trainer ? "Masuk sebagai lawan" : "Tonton"}</button>`;
+          return `<div class="p-2 bg-slate-900 text-white rounded-lg"><div class="flex justify-between"><strong>${esc(r.roomId)} • R${r.round}</strong><span>${label[r.phase]} ${fmt(r.left)}</span></div><div>🛡️ ${esc(r.cs)} <b>${r.csScore}</b> vs <b>${r.agScore}</b> ${esc(r.agen)} 🔥</div><div class="h-1.5 rounded bg-red-600 mt-1 overflow-hidden"><div class="h-full bg-sky-500" style="width:${sh}%"></div></div>${btn}</div>`;
         }).join("");
+        setHtml(box, html, html);
       }).catch(() => {});
       go();
       boardPoll = setInterval(go, 4000);
