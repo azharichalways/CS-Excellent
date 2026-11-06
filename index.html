@@ -226,6 +226,11 @@
     </main>
   </div>
 
+  <div id="verWarn" class="hidden fixed bottom-0 inset-x-0 z-[70] bg-rose-600 text-white text-xs font-bold p-3 text-center">
+    ⚠️ Apps Script yang aktif masih versi lama (jeda ronde 30 menit, tombol percepat ronde 2 dan penilaian terbaru tidak berfungsi).
+    Buka Apps Script → Deploy → Manage deployments → ✏️ Edit → Version: <u>New version</u> → Deploy.
+  </div>
+
   <!-- MODAL REVIEW & SERTIFIKAT -->
   <div id="modalReview" class="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-4 hidden">
     <div class="bg-stone-900 text-amber-50 w-full max-w-md rounded-2xl p-4 max-h-[85vh] flex flex-col">
@@ -492,6 +497,8 @@
       ]
     };
 
+    const NEED_VER = 8;   // versi minimal backend Apps Script
+    function checkVer(v) { document.getElementById("verWarn").classList.toggle("hidden", (v || 0) >= NEED_VER); }
     const LEVEL_PASS = { 1: 70, 2: 70, 3: 70, 4: 70, 5: 60, 6: 70 };   // nilai minimal lulus per level
     const LEVEL_TIMERS = { 1:120, 2:150, 3:360, 4:420, 5:600, 6:720 };
 
@@ -991,6 +998,7 @@
       try {
         const r = await (await fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getDuel&room=${encodeURIComponent(duelRoomId)}&nama=${encodeURIComponent(me())}`)).json();
         if (r.status !== "success") return;
+        checkVer(r.ver);
         clockOffset = r.serverNow - Date.now();
         duel = r;
         renderDuel(duelStage(duel, nowMs()));
@@ -1005,9 +1013,9 @@
         $("arRound").innerText = stg.i + 1;
         $("arCsName").innerText = r.cs; $("arAgenName").innerText = r.agen;
         $("arBrief").innerHTML = role === "agen"
-          ? `<strong>🔥 Kamu AGEN.</strong> Mulailah komplain tentang apa saja terkait layanan server pulsa/PPOB (transaksi, saldo, deposit, harga, dll). Buat realistis: sebut nominal, waktu, atau nomor, tunjukkan emosi bertahap, dan tuntut kepastian. Jangan menghina. Keluhanmu juga dinilai!`
+          ? `<strong>🔥 Kamu AGEN.</strong> Mulailah komplain tentang apa saja terkait layanan server pulsa/PPOB (transaksi, saldo, deposit, harga, dll). Buat realistis: sebut nominal, waktu, atau nomor, tunjukkan emosi bertahap, dan tuntut kepastian. Jangan menghina. Setiap pesanmu dinilai, termasuk pesan beruntun (pesan yang sama berulang tidak dihitung).`
           : role === "cs"
-          ? `<strong>🛡️ Kamu CS.</strong> Tunggu agen mulai komplain, lalu balas dengan empati, tindakan konkret, dan estimasi waktu. Tiap balasan dinilai.`
+          ? `<strong>🛡️ Kamu CS.</strong> Tunggu agen mulai komplain, lalu balas dengan empati, tindakan konkret, dan estimasi waktu. Setiap balasan dinilai, termasuk balasan beruntun (pesan yang sama berulang tidak dihitung).`
           : `<strong>👀 Mode pantau.</strong> Kamu melihat duel ini tanpa ikut menulis.`;
         $("arInput").placeholder = role === "agen" ? "Tulis keluhanmu sebagai agen..." : "Tulis balasan CS...";
       }
@@ -1036,7 +1044,7 @@
       const isCs = m.r === "cs";
       const tag = isCs ? (p => p >= 85 ? "💥 Serangan telak" : p >= 70 ? "⚔️ Kena" : p >= 50 ? "🛡️ Tertahan" : "💢 Meleset")(m.p)
                        : (p => p >= 85 ? "🔥 Tekanan tinggi" : p >= 70 ? "🔥 Tekanan kuat" : p >= 50 ? "🔥 Tekanan sedang" : "🔥 Tekanan lemah")(m.p);
-      const chip = m.x ? `<div class="text-[9px] text-slate-300 mt-1">belum dinilai (menunggu giliran lawan)</div>`
+      const chip = m.x ? `<div class="text-[9px] text-slate-300 mt-1">${m.d ? "pesan sama dengan sebelumnya, tidak dinilai" : "belum dinilai (menunggu agen memulai komplain)"}</div>`
         : `<div class="text-[10px] font-bold mt-1 ${m.p >= 70 ? 'text-emerald-300' : m.p >= 50 ? 'text-amber-300' : 'text-rose-300'}">${tag} • ${m.p}</div><div class="text-[9px] opacity-80">${esc(m.f || "")}</div>`;
       return `<div class="flex ${isCs ? 'justify-end' : 'justify-start'}"><div class="max-w-[85%] px-3 py-2 rounded-xl text-xs text-left ${isCs ? 'bg-sky-700 text-white' : 'bg-red-800 text-red-50'}"><div class="text-[9px] opacity-70 font-bold">${isCs ? '🛡️' : '🔥'} ${esc(m.n)}${m.n === me() ? " (kamu)" : ""}</div>${esc(m.t)}${chip}</div></div>`;
     }
@@ -1082,7 +1090,7 @@
       setHtml(ba, html, html);
     }
     async function startAct(op) {
-      try { await postJSON({ action: "duelStartRound", room: duelRoomId, nama: me(), op }); } catch (e) {}
+      try { const r = await postJSON({ action: "duelStartRound", room: duelRoomId, nama: me(), op }); if (r && r.status === "invalid action") checkVer(0); } catch (e) {}
       pollDuel();
     }
 
@@ -1136,13 +1144,13 @@
       const inp = $("arInput"), text = inp.value.trim();
       if (!duel || !text || duelSending) return;
       duelSending = true; inp.value = ""; $("arSend").innerText = "...";
-      try { await postJSON({ action: "duelSend", room: duelRoomId, nama: me(), text }); } catch (e) { inp.value = text; }
+      try { const r = await postJSON({ action: "duelSend", room: duelRoomId, nama: me(), text }); if (r && r.status === "invalid action") checkVer(0); } catch (e) { inp.value = text; }
       duelSending = false; $("arSend").innerText = "Kirim ⚔️";
       pollDuel();
     }
 
     async function pauseAct(op) {
-      try { await postJSON({ action: "duelPause", room: duelRoomId, nama: me(), op }); } catch (e) {}
+      try { const r = await postJSON({ action: "duelPause", room: duelRoomId, nama: me(), op }); if (r && r.status === "invalid action") checkVer(0); } catch (e) {}
       pollDuel();
     }
 
@@ -1202,6 +1210,7 @@
     function startOnlinePoll() {
       clearInterval(onlinePoll);
       const go = () => fetch(`${CONFIG.APPS_SCRIPT_URL}?action=getOnlineUsers`).then(r => r.json()).then(d => {
+        checkVer(d.ver);
         const u = d.users || [];
         const html = `<div class="font-bold text-slate-700">👥 Peserta online (${u.length})</div>` + (u.length
           ? u.map(x => `<div class="flex justify-between gap-2"><span>${esc(x.nama)} <span class="text-slate-400">• ${esc(x.namaLengkap)} • ${esc(x.tim)}</span></span><span class="text-emerald-600 whitespace-nowrap">${esc(x.ageSec)} dtk lalu</span></div>`).join("")
@@ -1338,7 +1347,7 @@
         const holder = document.createElement("div");
         new QRCode(holder, { text: url, width: 220, height: 220, correctLevel: QRCode.CorrectLevel.M });
         const src = holder.querySelector("canvas");
-        if (src) { g.drawImage(src, W - 170 - 220, 1100, 220, 220); g.textAlign = "center"; g.font = "22px system-ui, sans-serif"; g.fillStyle = "#64748b"; g.fillText("Pindai untuk verifikasi", W - 280, 1350); }
+        if (src) { g.drawImage(src, W - 170 - 220, 1055, 220, 220); g.textAlign = "center"; g.font = "22px system-ui, sans-serif"; g.fillStyle = "#64748b"; g.fillText("Pindai untuk verifikasi", W - 280, 1308); }
       } catch (e) {}
       return cv;
     }
