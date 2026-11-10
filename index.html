@@ -498,7 +498,7 @@
       ]
     };
 
-    const NEED_VER = 10;   // versi minimal backend Apps Script
+    const NEED_VER = 11;   // versi minimal backend Apps Script
     function checkVer(v) { document.getElementById("verWarn").classList.toggle("hidden", (v || 0) >= NEED_VER); }
     const LEVEL_PASS = { 1: 70, 2: 70, 3: 70, 4: 70, 5: 60, 6: 70 };   // nilai minimal lulus per level
     const LEVEL_TIMERS = { 1:120, 2:150, 3:360, 4:420, 5:600, 6:720 };
@@ -921,7 +921,8 @@
     const me = () => currentUser.isTrainer ? TRAINER_ALIAS : currentUser.namaPanggung;
     const duelPost = payload => postJSON(currentUser.isTrainer ? Object.assign({ pin: sessionStorage.getItem("cs_pin") }, payload) : payload);
     const fmt = s => { s = Math.max(0, Math.ceil(s)); return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0"); };
-    const sideScore = (sum, n) => n ? Math.round(sum / n * Math.min(1, n / 5)) : 0;
+    let MIN_SCORED = 5;   // diambil dari server (getDuel)
+    const sideScore = (sum, n) => n ? Math.round(sum / n * Math.min(1, n / MIN_SCORED)) : 0;
     const setHtml = (el, key, html) => { if (el.dataset.k !== key) { el.innerHTML = html; el.dataset.k = key; } };
 
     // --- logika waktu (sama dengan server) ---
@@ -1003,7 +1004,7 @@
         if (r.status !== "success") return;
         checkVer(r.ver);
         clockOffset = r.serverNow - Date.now();
-        duel = r;
+        duel = r; MIN_SCORED = r.minScored || 5;
         renderDuel(duelStage(duel, nowMs()));
       } catch (e) {}
     }
@@ -1024,7 +1025,7 @@
       }
       const cs = sideScore(r.csSum, r.csN), ag = sideScore(r.agSum, r.agN);
       $("arCsPts").innerText = cs; $("arAgenPts").innerText = ag;
-      $("arCsMeta").innerText = `${Math.min(r.csN, 5)}/5 balasan dinilai`; $("arAgenMeta").innerText = `${Math.min(r.agN, 5)}/5 keluhan dinilai`;
+      $("arCsMeta").innerText = `${Math.min(r.csN, MIN_SCORED)}/${MIN_SCORED} balasan dinilai`; $("arAgenMeta").innerText = `${Math.min(r.agN, MIN_SCORED)}/${MIN_SCORED} keluhan dinilai`;
       const share = cs + ag ? Math.round(cs / (cs + ag) * 100) : 50;
       $("arBar").style.width = share + "%";
       $("arDom").innerText = share >= 60 ? `🛡️ CS mendominasi (${share}%)` : share <= 40 ? `🔥 Agen mendominasi (${100 - share}%)` : `⚖️ Imbang (${share}% : ${100 - share}%)`;
